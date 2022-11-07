@@ -1,3 +1,5 @@
+const SERVER_URL = import.meta.env.SERVER_URL
+
 // カラーパッチ画像
 let colorpatchImg;
 // アップロードした元の画像
@@ -127,7 +129,7 @@ function updateImage() {
   };
 
   return httpPost(
-    "/api/process",
+    `${SERVER_URL}/api/process`,
     "json",
     body,
     function (result) {
@@ -165,7 +167,7 @@ function predictCurrntImg() {
   };
 
   return httpPost(
-    "/api/predict",
+    `${SERVER_URL}/api/predict`,
     "json",
     body,
     function (result) {
@@ -192,7 +194,7 @@ function optimazeCurrntImg() {
     colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
   };
   return httpPost(
-    "/api/optimize",
+    `${SERVER_URL}/api/optimize`,
     "json",
     body,
     function (result) {
