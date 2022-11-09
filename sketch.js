@@ -1,4 +1,4 @@
-const SERVER_URL = import.meta.env.VITE_SERVER_URL
+const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
 
 // カラーパッチ画像
 let colorpatchImg;

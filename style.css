@@ -1,0 +1,144 @@
+html, body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+footer.footer {
+  width: 100%;
+  height: 3.5em;
+  padding: 10px 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2em;
+  position: absolute;
+}
+
+main.editor-container {
+  display: flex;
+  height: calc(100% - 3.5em);
+  width: 100%;
+}
+
+canvas {
+  display: block;
+}
+
+label {
+  font-weight: bold;
+}
+
+.image-preview-area {
+  position: relative;
+  display: inline-block;
+  width: 65%;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: #fafafa;
+}
+
+.canvas-area {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.editor {
+  background-color: #f5f5f5;
+  display: flex;
+  width: 35%;
+  height: 100%;
+  padding: 5%;
+  box-sizing: border-box;
+
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sliders-title {
+  font-size: larger;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1em;
+  margin-top: 2em;
+}
+
+.after-edit-buttons {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.drag-erea {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.drag-erea.drag {
+  background: #f0f0f0;
+}
+
+.drag-erea input {
+   margin: 0 auto;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.loading-container {
+  background-color: rgba(0, 0, 0, 25%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#optimization-loading {
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+
+.three-quarter-spinner {
+  width: 100px;
+  height: 100px;
+  border: 10px solid #eeeeee;
+  border-top: 10px solid transparent;
+  box-sizing: border-box;
+  border-radius: 50%;
+  animation: spin .5s linear 0s infinite;
+}
