@@ -1,4 +1,5 @@
-const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
+const SERVER_URL = 'http://localhost:8000'
+// const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -8,6 +9,9 @@ let originalImg;
 let currentImg;
 // 予測の画像
 let previewImg;
+// 最適化後の画像
+let optimizedImg;
+let optimizedPreviewImg;
 // キャンバスの幅と高さ
 let canvasWidth, canvasHeight;
 
@@ -43,11 +47,15 @@ function handleFile(file, imgType) {
           predictCurrntImg();
 
           // disableされているコンポーネントを全てenableに
-          document.querySelectorAll(":disabled").forEach((elem) => (elem.disabled = false));
+          document.querySelectorAll(":disabled").forEach((elem) => {
+            if (elem.id !== 'optimization') elem.disabled = false
+          });
 
           // ファイルアップロード部分を隠してキャンバスを表示
           hide("upload-area");
           show("canvas-area");
+
+          createOptimazedImg();
         });
       }
     };
@@ -184,33 +192,36 @@ function predictCurrntImg() {
   );
 }
 
-// サーバでサイアノプリントした結果を最適化して更新
-function optimazeCurrntImg() {
-  show("loading");
-  show("optimization-loading");
-
+// サーバでサイアノプリントした結果について最適化した画像を保持しておく
+async function createOptimazedImg() {
   const body = {
     img_base64: originalImg.canvas.toDataURL(),
     colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
   };
+
   return httpPost(
     `${SERVER_URL}/api/optimize`,
     "json",
     body,
     function (result) {
-      currentImg = loadImage(`data:image/png;base64,${result.opt_img_base64}`);
-      previewImg = loadImage(`data:image/png;base64,${result.sim_img_base64}`);
+      optimizedImg = loadImage(`data:image/png;base64,${result.opt_img_base64}`);
+      optimizedPreviewImg = loadImage(`data:image/png;base64,${result.preview_img_base64}`);
 
-      hide("loading");
-      hide("optimization-loading");
+      // optimizationコンポーネントをenableに
+      document.querySelectorAll(":disabled").forEach((elem) => {
+        if (elem.id === 'optimization') elem.disabled = false
+      });
     },
     function (error) {
       alert(error);
-
-      hide("loading");
-      hide("optimization-loading");
     }
   );
+}
+
+// サーバでサイアノプリントした結果を最適化して更新
+function showOptimizedImg() {
+  currentImg = optimizedImg;
+  previewImg = optimizedPreviewImg;
 }
 
 function downloadCurrentImg() {
