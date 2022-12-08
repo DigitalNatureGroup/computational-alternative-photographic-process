@@ -1,5 +1,4 @@
-const SERVER_URL = 'http://localhost:8000'
-// const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
+const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
 
 // カラーパッチ画像
 let colorpatchImg;
