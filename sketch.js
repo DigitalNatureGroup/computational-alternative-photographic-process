@@ -48,7 +48,8 @@ function handleFile(file, imgType) {
 
           // disableされているコンポーネントを全てenableに
           document.querySelectorAll(":disabled").forEach((elem) => {
-            if (elem.id !== 'optimization') elem.disabled = false
+            if (elem.id === 'optimization') elem.innerText = 'Loading...'
+            else elem.disabled = false
           });
 
           // ファイルアップロード部分を隠してキャンバスを表示
@@ -209,7 +210,10 @@ async function createOptimazedImg() {
 
       // optimizationコンポーネントをenableに
       document.querySelectorAll(":disabled").forEach((elem) => {
-        if (elem.id === 'optimization') elem.disabled = false
+        if (elem.id === 'optimization') {
+          elem.innerText = 'Optimize image'
+          elem.disabled = false
+        }
       });
     },
     function (error) {
@@ -220,8 +224,13 @@ async function createOptimazedImg() {
 
 // サーバでサイアノプリントした結果を最適化して更新
 function showOptimizedImg() {
-  currentImg = optimizedImg;
-  previewImg = optimizedPreviewImg;
+  show("loading");
+
+  setTimeout(() => {
+    currentImg = optimizedImg;
+    previewImg = optimizedPreviewImg;
+    hide("loading");
+  }, 100)
 }
 
 function downloadCurrentImg() {
