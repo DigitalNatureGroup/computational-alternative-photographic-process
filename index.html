@@ -11,82 +11,31 @@
 
   <script src="./p5.min.js"></script>
   <script src="./sketch.js"></script>
-
+  <script src="./tonecurve/ToneCurve.js"></script>
+  <script src="./tonecurve/ToneCurveUI.js"></script>
 </head>
 
 <body>
   <main class="editor-container">
-    <section class="image-preview-area">
-      <div id="canvas-area" class="canvas-area">
-        <div id="canvas" class="canvas-container">
-        </div>
+    <div id="canvas-area" class="canvas-area">
+      <div id="canvas" class="canvas-container">
       </div>
-      <div id="upload-area" class="drag-erea">
-        <div class="section">
-          <label for="colorpatch">Colorpatch (optional)</label>
-          <input type="file" id="colorpatch" accept="image/*" value="upload"
-            onchange="handleFile(event.target.files[0], 'colorpatch')">
-        </div>
-        <div class="section">
-          <label for="target">Printed image</label>
-          <input type="file" id="target" accept="image/*" value="upload"
-            onchange="handleFile(event.target.files[0], 'target')">
-        </div>
+    </div>
+    <div id="upload-area" class="drag-erea">
+      <div class="section">
+        <label for="colorpatch">Colorpatch (optional)</label>
+        <input type="file" id="colorpatch" accept="image/*" value="upload"
+          onchange="handleFile(event.target.files[0], 'colorpatch')">
       </div>
-      <div id="loading" class="loading-container hidden">
-        <div class="three-quarter-spinner"></div>
+      <div class="section">
+        <label for="target">Printed image</label>
+        <input type="file" id="target" accept="image/*" value="upload"
+          onchange="handleFile(event.target.files[0], 'target')">
       </div>
-    </section>
-
-    <section class="editor">
-      <div class="sliders-container">
-        <p class="sliders-title">Color parameters</p>
-
-        <div class="sliders">
-          <label for="hue">Hue</label>
-          <input disabled type="range" id="hue" onchange="updateImage()" min="0" max="360" value="0" step="1">
-        </div>
-        <div class="sliders">
-          <label for="saturation">Saturation</label>
-          <input disabled type="range" id="saturation" onchange="updateImage()" min="0" max="1" value="1" step="0.01">
-        </div>
-        <div class="sliders">
-          <label for="lightness">Lightness</label>
-          <input disabled type="range" id="lightness" onchange="updateImage()" min="0" max="1" value="1" step="0.01">
-        </div>
-        <div class="sliders">
-          <label for="contrast">Contrast</label>
-          <input disabled type="range" id="contrast" onchange="updateImage()" min="-255" max="255" value="0" step="1">
-        </div>
-        <div class="sliders">
-          <label for="kelvin">Color Temperature</label>
-          <input disabled type="range" id="kelvin" onchange="updateImage()" min="1000" max="12200" value="6600"
-            step="1">
-        </div>
-
-        <div class="button-container">
-          <button disabled id="optimization" style="display: block;" class="waves-effect waves-light btn" onclick="showOptimizedImg()">
-            Optimize image
-          </button>
-          <button disabled style="display: block;" class="waves-effect waves-light btn" onclick="resetParameters()">
-            Reset Parameters
-          </button>
-          <button disabled style="display: block;" class="waves-effect waves-light btn" onclick="predictCurrntImg()">
-            Preview cyanotype
-          </button>
-        </div>
-      </div>
-
-      <div class="button-container">
-        <button disabled style="display: block;" class="waves-effect waves-light btn pink lighten-2"
-          onclick="downloadCurrentImg()">
-          Download current image
-        </button>
-        <button style="display: block;" class="waves-effect waves-light btn pink lighten-2" onclick="openHowToPrint()">
-          How to print
-        </button>
-      </div>
-    </section>
+    </div>
+    <div id="loading" class="loading-container hidden">
+      <div class="three-quarter-spinner"></div>
+    </div>
   </main>
 
   <footer class="page-footer footer grey lighten-5 z-depth-2">

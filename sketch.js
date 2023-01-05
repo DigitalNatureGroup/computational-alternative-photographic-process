@@ -1,4 +1,4 @@
-const SERVER_URL = 'https://computational-alternative-process-server.onrender.com'
+const SERVER_URL = "http://localhost:8000";
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -47,13 +47,15 @@ function handleFile(file, imgType) {
 
           // disableされているコンポーネントを全てenableに
           document.querySelectorAll(":disabled").forEach((elem) => {
-            if (elem.id === 'optimization') elem.innerText = 'Loading...'
-            else elem.disabled = false
+            if (elem.id === "optimization") elem.innerText = "Loading...";
+            else elem.disabled = false;
           });
 
           // ファイルアップロード部分を隠してキャンバスを表示
           hide("upload-area");
           show("canvas-area");
+
+          windowResized();
 
           createOptimazedImg();
         });
@@ -75,10 +77,15 @@ function setup() {
 
   // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
   hide("canvas-area");
+
+  // トーンカーブのUI設置
+  // TODO: 場所がえ
+  toneCurveUI = new ToneCurveUI({ x: 1100, y: 350 }, 280);
+  toneCurveUI.draw();
 }
 
 function draw() {
-  background('#fafafa');
+  background("#fafafa");
   fill(50);
   textAlign(CENTER);
   textStyle(BOLD);
@@ -102,12 +109,12 @@ function draw() {
   let x = (canvasWidth - width * 2 - imgPadding) / 2;
   let y = (canvasHeight - height) / 2;
 
-  text("Current image", x, y - fontSize * 1.5, width);
+  //   text("Current image", x, y - fontSize * 1.5, width);
   image(currentImg, x, y, width, height);
 
   if (previewImg) {
     x += imgPadding + width;
-    text("Cyanotype preview", x, y - fontSize * 1.5, width);
+    //     text("Cyanotype preview", x, y - fontSize * 1.5, width);
     image(previewImg, x, y, width, height);
   }
 
@@ -116,8 +123,10 @@ function draw() {
   width = (originalImg.width / originalImg.height) * originalImgHeight;
   fontSize = 12;
   textSize(fontSize);
-  text("Original", x, y - fontSize * 1.5, width);
-  image(originalImg, x, y, width, originalImgHeight);
+  //   text("Original", x, y - fontSize * 1.5, width);
+  //   image(originalImg, x, y, width, originalImgHeight);
+
+  toneCurveUI.draw();
 }
 
 // サーバでパラメータを変化させた画像を計算して更新
@@ -167,6 +176,8 @@ function resetParameters() {
 
 // サーバでサイアノプリントした結果を予測して表示
 function predictCurrntImg() {
+  if (!currentImg) return;
+
   show("loading");
 
   const body = {
@@ -209,9 +220,9 @@ async function createOptimazedImg() {
 
       // optimizationコンポーネントをenableに
       document.querySelectorAll(":disabled").forEach((elem) => {
-        if (elem.id === 'optimization') {
-          elem.innerText = 'Optimize image'
-          elem.disabled = false
+        if (elem.id === "optimization") {
+          elem.innerText = "Optimize image";
+          elem.disabled = false;
         }
       });
     },
@@ -229,7 +240,7 @@ function showOptimizedImg() {
     currentImg = optimizedImg;
     previewImg = optimizedPreviewImg;
     hide("loading");
-  }, 100)
+  }, 100);
 }
 
 function downloadCurrentImg() {
@@ -242,3 +253,61 @@ function openHowToPrint() {
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
+
+
+// トーンカーブ関連
+function editImage(source, target) {
+  if (!source || !target) return;
+
+  lut = toneCurveUI.currentLut;
+
+  source.loadPixels();
+  target.loadPixels();
+  for (let i = 0; i < 4 * source.width * source.height; i += 4) {
+    target.pixels[i] = lut[1][source.pixels[i]];
+    target.pixels[i + 1] = lut[2][source.pixels[i + 1]];
+    target.pixels[i + 2] = lut[3][source.pixels[i + 2]];
+
+    target.pixels[i] = lut[0][target.pixels[i]];
+    target.pixels[i + 1] = lut[0][target.pixels[i + 1]];
+    target.pixels[i + 2] = lut[0][target.pixels[i + 2]];
+  }
+
+  source.updatePixels();
+  target.updatePixels();
+}
+
+function keyPressed() {
+  toneCurveUI.keyPressed();
+}
+
+function mouseMoved() {
+  editImage(originalImg, currentImg);
+}
+
+function mouseReleased() {
+  toneCurveUI.mouseReleased();
+  predictCurrntImg();
+}
+
+function mouseDragged() {
+  toneCurveUI.mouseDragged();
+  editImage(originalImg, currentImg);
+}
+
+function mousePressed() {
+  toneCurveUI.mousePressed();
+}
+
+function mouseClicked() {
+  toneCurveUI.mouseClicked();
+  predictCurrntImg();
+}
+
+function windowResized() {
+  const canvasBoundingBox = document.getElementById("canvas").getBoundingClientRect();
+  canvasWidth = canvasBoundingBox.width;
+  canvasHeight = canvasBoundingBox.height;
+  resizeCanvas(canvasWidth, canvasHeight);
+}
+
