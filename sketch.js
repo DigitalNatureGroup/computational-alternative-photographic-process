@@ -55,10 +55,10 @@ function handleFile(file, imgType) {
           hide("upload-area");
           show("canvas-area");
 
-          windowResized();
-
           createOptimazedImg();
         });
+
+        createToneCurve(originalImg, currentImg);
       }
     };
     reader.readAsDataURL(file);
@@ -77,11 +77,6 @@ function setup() {
 
   // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
   hide("canvas-area");
-
-  // トーンカーブのUI設置
-  // TODO: 場所がえ
-  toneCurveUI = new ToneCurveUI({ x: 1100, y: 350 }, 280);
-  toneCurveUI.draw();
 }
 
 function draw() {
@@ -125,10 +120,7 @@ function draw() {
   textSize(fontSize);
   //   text("Original", x, y - fontSize * 1.5, width);
   //   image(originalImg, x, y, width, originalImgHeight);
-
-  toneCurveUI.draw();
 }
-
 // サーバでパラメータを変化させた画像を計算して更新
 function updateImage() {
   show("loading");
@@ -253,61 +245,3 @@ function openHowToPrint() {
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
-
-
-// トーンカーブ関連
-function editImage(source, target) {
-  if (!source || !target) return;
-
-  lut = toneCurveUI.currentLut;
-
-  source.loadPixels();
-  target.loadPixels();
-  for (let i = 0; i < 4 * source.width * source.height; i += 4) {
-    target.pixels[i] = lut[1][source.pixels[i]];
-    target.pixels[i + 1] = lut[2][source.pixels[i + 1]];
-    target.pixels[i + 2] = lut[3][source.pixels[i + 2]];
-
-    target.pixels[i] = lut[0][target.pixels[i]];
-    target.pixels[i + 1] = lut[0][target.pixels[i + 1]];
-    target.pixels[i + 2] = lut[0][target.pixels[i + 2]];
-  }
-
-  source.updatePixels();
-  target.updatePixels();
-}
-
-function keyPressed() {
-  toneCurveUI.keyPressed();
-}
-
-function mouseMoved() {
-  editImage(originalImg, currentImg);
-}
-
-function mouseReleased() {
-  toneCurveUI.mouseReleased();
-  predictCurrntImg();
-}
-
-function mouseDragged() {
-  toneCurveUI.mouseDragged();
-  editImage(originalImg, currentImg);
-}
-
-function mousePressed() {
-  toneCurveUI.mousePressed();
-}
-
-function mouseClicked() {
-  toneCurveUI.mouseClicked();
-  predictCurrntImg();
-}
-
-function windowResized() {
-  const canvasBoundingBox = document.getElementById("canvas").getBoundingClientRect();
-  canvasWidth = canvasBoundingBox.width;
-  canvasHeight = canvasBoundingBox.height;
-  resizeCanvas(canvasWidth, canvasHeight);
-}
-

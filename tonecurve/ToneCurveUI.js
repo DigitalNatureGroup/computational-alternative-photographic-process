@@ -1,23 +1,30 @@
 // Original: https://github.com/ReoHokazono/tonecurve
 
 class ToneCurveUI {
-  constructor(pos, width) {
+  constructor(p, pos, width) {
+    this.p = p;
+
+    this.buttonHeight = 30;
+    this.padding = 15;
+    width -= this.padding * 2;
+    pos.x += this.padding;
+    pos.y += this.padding;
+
     this.lineColors = ["#FFFFFF", "#FF453A", "#30D158", "#0A84FF"];
     this.ansLineColors = ["#8E8E93", "#C2736F", "#5C966A", "#6080A1"];
-    this.pos = pos;
     this.width = width;
     this.labels = ["RGB", "R", "G", "B"];
     this.selected = 0;
-    this.buttonHeight = 30;
     this.buttonWidth = width / 4;
     this.height = this.buttonHeight + 10 + this.width;
+    this.pos = pos;
     this.toneCurvePos = { x: pos.x, y: pos.y + this.buttonHeight + 10 };
 
     this.curves = [
-      new ToneCurve(this.toneCurvePos, width),
-      new ToneCurve(this.toneCurvePos, width),
-      new ToneCurve(this.toneCurvePos, width),
-      new ToneCurve(this.toneCurvePos, width),
+      new ToneCurve(p, this.toneCurvePos, width),
+      new ToneCurve(p, this.toneCurvePos, width),
+      new ToneCurve(p, this.toneCurvePos, width),
+      new ToneCurve(p, this.toneCurvePos, width),
     ];
     for (let i = 0; i < 3; i++) {
       this.curves[i + 1].isHidden = true;
@@ -26,8 +33,8 @@ class ToneCurveUI {
     this.ansLuts = [];
     this.ansPoints = [];
 
-    textFont("Helvetica", 20);
-    textAlign(CENTER, CENTER);
+    this.p.textFont("Helvetica", 20);
+    this.p.textAlign(CENTER, CENTER);
   }
 
   get rgbLut() {
@@ -57,10 +64,16 @@ class ToneCurveUI {
   }
 
   draw() {
-    noStroke();
-    fill("#2E2F30");
-    rect(this.pos.x - 15, this.pos.y - 15, this.width + 30, this.height + 30, 5);
-    noFill();
+    this.p.noStroke();
+    this.p.fill("#2E2F30");
+    this.p.rect(
+      this.pos.x - this.padding,
+      this.pos.y - this.padding,
+      this.width + this.padding * 2,
+      this.height + this.padding * 2,
+      5
+    );
+    this.p.noFill();
     this.drawTab();
 
     for (let i = 0; i < 4; i++) {
@@ -114,28 +127,28 @@ class ToneCurveUI {
   drawTab() {
     let isOnIndex = 4;
     let isOnTab =
-      mouseX >= this.pos.x &&
-      mouseX <= this.pos.x + this.width &&
-      mouseY >= this.pos.y &&
-      mouseY <= this.pos.y + this.buttonHeight;
+      this.p.mouseX >= this.pos.x &&
+      this.p.mouseX <= this.pos.x + this.width &&
+      this.p.mouseY >= this.pos.y &&
+      this.p.mouseY <= this.pos.y + this.buttonHeight;
     if (isOnTab) {
-      let mousePos = ((mouseX - this.pos.x) / this.width) * 4;
+      let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
       isOnIndex = index;
     }
 
-    noStroke();
-    textFont("Helvetica", 20);
-    textAlign(CENTER, CENTER);
+    this.p.noStroke();
+    this.p.textFont("Helvetica", 20);
+    this.p.textAlign(CENTER, CENTER);
 
     let y = this.pos.y + this.buttonHeight / 2;
     for (let i = 0; i < 4; i++) {
       if (i == this.selected) {
-        fill(i == isOnIndex ? "#44A1FF" : "#0A84FF");
+        this.p.fill(i == isOnIndex ? "#44A1FF" : "#0A84FF");
         //fill("#0A84FF")
         this.curves[i].isHidden = false;
       } else {
-        fill(i == isOnIndex ? "#5F5F5F" : "#454545");
+        this.p.fill(i == isOnIndex ? "#5F5F5F" : "#454545");
         //fill(isOnTab ? "#5F5F5F" : "#454545")
         //fill("#454545")
         this.curves[i].isHidden = true;
@@ -149,7 +162,7 @@ class ToneCurveUI {
         corners = [0, 3, 3, 0];
       }
 
-      rect(
+      this.p.rect(
         x,
         this.pos.y,
         this.buttonWidth,
@@ -159,11 +172,11 @@ class ToneCurveUI {
         corners[2],
         corners[3]
       );
-      fill("#FFFFFF");
-      text(this.labels[i], x, y, this.buttonWidth);
+      this.p.fill("#FFFFFF");
+      this.p.text(this.labels[i], x, y, this.buttonWidth);
     }
-    noFill();
-    stroke(0);
+    this.p.noFill();
+    this.p.stroke(0);
   }
 
   keyPressed() {
@@ -174,12 +187,12 @@ class ToneCurveUI {
 
   mouseClicked() {
     let isOnTab =
-      mouseX >= this.pos.x &&
-      mouseX <= this.pos.x + this.width &&
-      mouseY >= this.pos.y &&
-      mouseY <= this.pos.y + this.buttonHeight;
+      this.p.mouseX >= this.pos.x &&
+      this.p.mouseX <= this.pos.x + this.width &&
+      this.p.mouseY >= this.pos.y &&
+      this.p.mouseY <= this.pos.y + this.buttonHeight;
     if (isOnTab) {
-      let mousePos = ((mouseX - this.pos.x) / this.width) * 4;
+      let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
       this.selected = index;
     }

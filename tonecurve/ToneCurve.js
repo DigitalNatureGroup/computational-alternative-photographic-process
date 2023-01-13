@@ -162,26 +162,28 @@ class Util {
 }
 
 class ToneCurve {
-  constructor(pos, size) {
+  constructor(p, pos, size) {
+    this.p = p;
+
     this.isHidden = false;
     this.pos = pos;
     this.size = size;
     this.controlPoints = [
-      new ControlPoint({ x: 0, y: 0 }, this.pos, this.size),
-      new ControlPoint({ x: 255, y: 255 }, this.pos, this.size),
+      new ControlPoint(p, { x: 0, y: 0 }, this.pos, this.size),
+      new ControlPoint(p, { x: 255, y: 255 }, this.pos, this.size),
     ];
 
-    this.controlLine = new ControlLine(this.pos, this.size, this.controlPoints);
+    this.controlLine = new ControlLine(p, this.pos, this.size, this.controlPoints);
     this.util = new Util(this.pos, this.size);
     this.isControlPointDragging = false;
   }
 
   reset() {
     this.controlPoints = [
-      new ControlPoint({ x: 0, y: 0 }, this.pos, this.size),
-      new ControlPoint({ x: 255, y: 255 }, this.pos, this.size),
+      new ControlPoint(this.p, { x: 0, y: 0 }, this.pos, this.size),
+      new ControlPoint(this.p, { x: 255, y: 255 }, this.pos, this.size),
     ];
-    this.controlLine = new ControlLine(this.pos, this.size, this.controlPoints);
+    this.controlLine = new ControlLine(this.p, this.pos, this.size, this.controlPoints);
   }
 
   draw() {
@@ -205,11 +207,11 @@ class ToneCurve {
   }
 
   drawBg() {
-    noStroke();
-    fill("#454545");
-    square(this.pos.x, this.pos.y, this.size, 3);
-    noFill();
-    stroke("#000000");
+    this.p.noStroke();
+    this.p.fill("#454545");
+    this.p.square(this.pos.x, this.pos.y, this.size, 3);
+    this.p.noFill();
+    this.p.stroke("#000000");
   }
 
   keyPressed() {
@@ -261,6 +263,7 @@ class ToneCurve {
 
     for (let i = 0; i < this.controlPoints.length; i++) {
       let controlPoint = this.controlPoints[i];
+      controlPoint.update();
       controlPoint.isSelected = false;
     }
 
@@ -273,7 +276,9 @@ class ToneCurve {
       }
     }
 
+    this.controlLine.update();
     if (!this.isControlPointDragging && this.controlLine.isOnMidLine) {
+      console.log("add control point");
       this.addControlPoint();
     }
   }
@@ -283,14 +288,14 @@ class ToneCurve {
       return;
     }
     for (let i = 0; i < lut.length - 1; i++) {
-      stroke(color);
+      this.p.stroke(color);
       let p0 = { x: i, y: lut[i] };
       let p1 = { x: i + 1, y: lut[i + 1] };
       let mp0 = this.util.toMain(p0);
       let mp1 = this.util.toMain(p1);
-      line(mp0.x, mp0.y, mp1.x, mp1.y);
+      this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
     }
-    stroke("#000000");
+    this.p.stroke("#000000");
   }
 
   drawAnsLine(luts, isRgb) {
@@ -300,24 +305,24 @@ class ToneCurve {
   }
 
   drawAnsPoints(points) {
-    fill("#8E8E93");
-    noStroke();
+    this.p.fill("#8E8E93");
+    this.p.noStroke();
     if (this.isHidden) {
       return;
     }
     for (let i = 0; i < points.length; i++) {
       let m0 = this.util.toMain(points[i]);
-      circle(m0.x, m0.y, 8);
+      this.p.circle(m0.x, m0.y, 8);
     }
   }
 
   addControlPoint() {
-    this.localMouse = this.util.toLocal({ x: mouseX, y: mouseY });
+    this.localMouse = this.util.toLocal({ x: this.p.mouseX, y: this.p.mouseY });
     for (let i = 0; i < this.controlPoints.length - 1; i++) {
       let x0 = this.controlPoints[i].center.x;
       let x1 = this.controlPoints[i + 1].center.x;
       let currentX = this.localMouse.x;
-      let newPoint = new ControlPoint(this.localMouse, this.pos, this.size);
+      let newPoint = new ControlPoint(this.p, this.localMouse, this.pos, this.size);
       if (currentX > x0 && currentX < x1) {
         this.controlPoints.splice(i + 1, 0, newPoint);
       }
@@ -326,7 +331,8 @@ class ToneCurve {
 }
 
 class ControlLine {
-  constructor(pos, size, controlPoints) {
+  constructor(p, pos, size, controlPoints) {
+    this.p = p;
     this.lut = this.createDefaultLut();
     this.top = new Array(256);
     this.bottom = new Array(256);
@@ -356,13 +362,16 @@ class ControlLine {
   }
 
   update() {
-    this.localMouse = this.util.toLocal({ x: mouseX, y: mouseY });
+    this.localMouse = this.util.toLocal({ x: this.p.mouseX, y: this.p.mouseY });
     let isOnDarkLine =
       this.localMouse.x >= 0 &&
       this.localMouse.x <= this.controlPoints[0].center.x &&
       this.localMouse.y >= this.controlPoints[0].center.y - this.padding &&
       this.localMouse.y <= this.controlPoints[0].center.y + this.padding;
-    if ((isOnDarkLine && mouseIsPressed) || (this.isDarkLineDragging && mouseIsPressed)) {
+    if (
+      (isOnDarkLine && this.p.mouseIsPressed) ||
+      (this.isDarkLineDragging && this.p.mouseIsPressed)
+    ) {
       this.controlPoints[0].center.y = this.localMouse.y;
       this.isDarkLineDragging = true;
     } else {
@@ -375,7 +384,10 @@ class ControlLine {
       this.localMouse.x <= 255 &&
       this.localMouse.y >= this.controlPoints[last].center.y - this.padding &&
       this.localMouse.y <= this.controlPoints[last].center.y + this.padding;
-    if ((isOnLightLine && mouseIsPressed) || (this.isLightLineDragging && mouseIsPressed)) {
+    if (
+      (isOnLightLine && this.p.mouseIsPressed) ||
+      (this.isLightLineDragging && this.p.mouseIsPressed)
+    ) {
       this.controlPoints[last].center.y = this.localMouse.y;
       this.isLightLineDragging = true;
     } else {
@@ -397,7 +409,7 @@ class ControlLine {
       let p1 = { x: i, y: 0 };
       let mp0 = this.util.toMain(p0);
       let mp1 = this.util.toMain(p1);
-      line(mp0.x, mp0.y, mp1.x, mp1.y);
+      this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
     }
   }
 
@@ -406,7 +418,7 @@ class ControlLine {
     let p1 = this.controlPoints[0].center;
     let mp0 = this.util.toMain(p0);
     let mp1 = this.util.toMain(p1);
-    line(mp0.x, mp0.y, mp1.x, mp1.y);
+    this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
 
     let points = round(p1.x) + 1;
     for (let i = 0; i < points; i++) {
@@ -420,7 +432,7 @@ class ControlLine {
     let p1 = this.controlPoints[last].center;
     let mp0 = this.util.toMain(p0);
     let mp1 = this.util.toMain(p1);
-    line(mp0.x, mp0.y, mp1.x, mp1.y);
+    this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
     let points = 255 - round(p1.x) + 1;
     for (let i = 0; i < points; i++) {
       this.lut[i + round(p1.x)] = round(this.controlPoints[last].center.y);
@@ -432,7 +444,7 @@ class ControlLine {
     let p1 = this.controlPoints[1].center;
     let mp0 = this.util.toMain(p0);
     let mp1 = this.util.toMain(p1);
-    line(mp0.x, mp0.y, mp1.x, mp1.y);
+    this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
 
     let points = round(p1.x) - round(p0.x) - 1;
     let a = (p1.y - p0.y) / (p1.x - p0.x);
@@ -459,14 +471,16 @@ class ControlLine {
       let y1 = limitNum(spline.at(x1), 255, 0);
       let m0 = this.util.toMain({ x: x0, y: y0 });
       let m1 = this.util.toMain({ x: x1, y: y1 });
-      line(m0.x, m0.y, m1.x, m1.y);
+      this.p.line(m0.x, m0.y, m1.x, m1.y);
       this.lut[round(x1)] = round(y1);
     }
   }
 }
 
 class ControlPoint {
-  constructor(point, pos, s) {
+  constructor(p, point, pos, s) {
+    this.p = p;
+
     this.center = point;
     this.size = 8;
     this.padding = 4;
@@ -486,11 +500,16 @@ class ControlPoint {
     this.mainCenter = this.util.toMain(this.center);
 
     if (this.isSelected) {
-      fill(20);
+      this.p.fill(20);
     } else {
-      noFill();
+      this.p.noFill();
     }
-    square(this.mainCenter.x - this.size / 2, this.mainCenter.y - this.size / 2, this.size, 2);
+    this.p.square(
+      this.mainCenter.x - this.size / 2,
+      this.mainCenter.y - this.size / 2,
+      this.size,
+      2
+    );
   }
 
   update() {
@@ -500,7 +519,7 @@ class ControlPoint {
     this.maxY = this.center.y + this.size / 2 + this.padding;
     this.minY = this.center.y - this.size / 2 - this.padding;
 
-    this.localMouse = this.util.toLocal({ x: mouseX, y: mouseY });
+    this.localMouse = this.util.toLocal({ x: this.p.mouseX, y: this.p.mouseY });
     this.isHovering =
       this.localMouse.x <= this.maxX &&
       this.localMouse.x >= this.minX &&
@@ -510,9 +529,9 @@ class ControlPoint {
     this.max = { x: this.xMaxLimit, y: 255 };
     this.min = { x: this.xMinLimit, y: 0 };
 
-    this.isClicked = mouseX == pmouseX && mouseY == pmouseY;
+    this.isClicked = this.p.mouseX == pmouseX && this.p.mouseY == pmouseY;
 
-    if ((this.isHovering && mouseIsPressed) || (this.isDragging && mouseIsPressed)) {
+    if ((this.isHovering && this.p.mouseIsPressed) || (this.isDragging && this.p.mouseIsPressed)) {
       this.center = limitPoint(this.localMouse, this.max, this.min);
       this.isDragging = true;
     } else {
