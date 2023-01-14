@@ -58,7 +58,7 @@ function handleFile(file, imgType) {
           createOptimazedImg();
         });
 
-        createToneCurve(originalImg, currentImg);
+        createToneCurve(updateImageByToneCurve);
       }
     };
     reader.readAsDataURL(file);
@@ -245,3 +245,23 @@ function openHowToPrint() {
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
+
+const updateImageByToneCurve = (lut) => {
+  if (!originalImg || !currentImg) return;
+
+  originalImg.loadPixels();
+  currentImg.loadPixels();
+
+  for (let i = 0; i < 4 * originalImg.width * originalImg.height; i += 4) {
+    currentImg.pixels[i] = lut[1][originalImg.pixels[i]];
+    currentImg.pixels[i + 1] = lut[2][originalImg.pixels[i + 1]];
+    currentImg.pixels[i + 2] = lut[3][originalImg.pixels[i + 2]];
+
+    currentImg.pixels[i] = lut[0][currentImg.pixels[i]];
+    currentImg.pixels[i + 1] = lut[0][currentImg.pixels[i + 1]];
+    currentImg.pixels[i + 2] = lut[0][currentImg.pixels[i + 2]];
+  }
+
+  originalImg.updatePixels();
+  currentImg.updatePixels();
+};

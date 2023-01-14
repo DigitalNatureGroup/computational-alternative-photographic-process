@@ -1,8 +1,9 @@
-// Original: https://github.com/ReoHokazono/tonecurve
+// based on: https://github.com/ReoHokazono/tonecurve
 
 class ToneCurveUI {
-  constructor(p, pos, width) {
+  constructor(p, pos, width, onChange) {
     this.p = p;
+    this.onChange = onChange;
 
     this.buttonHeight = 30;
     this.padding = 15;
@@ -29,9 +30,6 @@ class ToneCurveUI {
     for (let i = 0; i < 3; i++) {
       this.curves[i + 1].isHidden = true;
     }
-    this.drawAns = false;
-    this.ansLuts = [];
-    this.ansPoints = [];
 
     this.p.textFont("Helvetica", 20);
     this.p.textAlign(CENTER, CENTER);
@@ -57,10 +55,26 @@ class ToneCurveUI {
     return [this.rgbLut, this.rLut, this.gLut, this.bLut];
   }
 
+  get mouseOnTab() {
+    return (
+      this.p.mouseX >= this.pos.x &&
+      this.p.mouseX <= this.pos.x + this.width &&
+      this.p.mouseY >= this.pos.y &&
+      this.p.mouseY <= this.pos.y + this.buttonHeight
+    );
+  }
+
+  get mouseOnUI() {
+    return (
+      this.p.mouseX >= this.pos.x &&
+      this.p.mouseX <= this.pos.x + this.width &&
+      this.p.mouseY >= this.pos.y &&
+      this.p.mouseY <= this.pos.y + this.height
+    );
+  }
+
   reset() {
-    for (let i = 0; i < this.curves.length; i++) {
-      this.curves[i].reset();
-    }
+    this.curves.forEach((c) => c.reset());
   }
 
   draw() {
@@ -74,11 +88,9 @@ class ToneCurveUI {
       5
     );
     this.p.noFill();
-    this.drawTab();
 
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].drawBg();
-    }
+    this.drawTab();
+    this.curves.forEach((c) => c.drawBg());
 
     for (let i = 1; i < 4; i++) {
       let points = this.curves[i].controlPoints;
@@ -95,43 +107,12 @@ class ToneCurveUI {
       }
     }
 
-    if (this.drawAns) {
-      for (let i = 0; i < 4; i++) {
-        this.curves[i].drawAnsPoints(this.ansPoints[i]);
-      }
-    }
-
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].draw();
-    }
-  }
-
-  drawAnsx() {
-    for (let i = 0; i < 4; i++) {
-      if (i == 0) {
-        for (let j = 1; j < 4; j++) {
-          let ps = this.ansPoints[j];
-          let isLine =
-            ps.length == 2 && ps[0].x == 0 && ps[0].y == 0 && ps[1].x == 255 && ps[1].y == 255;
-          if (!isLine) {
-            this.curves[0].drawAnsPoints(this.ansPoints[j]);
-            this.curves[0].drawLutLine(this.ansLuts[j], this.ansLineColors[j]);
-          }
-        }
-      }
-      this.curves[i].drawAnsPoints(this.ansPoints[i]);
-      this.curves[i].drawLutLine(this.ansLuts[i], this.ansLineColors[i]);
-    }
+    this.curves.forEach((c) => c.draw());
   }
 
   drawTab() {
     let isOnIndex = 4;
-    let isOnTab =
-      this.p.mouseX >= this.pos.x &&
-      this.p.mouseX <= this.pos.x + this.width &&
-      this.p.mouseY >= this.pos.y &&
-      this.p.mouseY <= this.pos.y + this.buttonHeight;
-    if (isOnTab) {
+    if (this.mouseOnTab) {
       let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
       isOnIndex = index;
@@ -180,18 +161,15 @@ class ToneCurveUI {
   }
 
   keyPressed() {
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].keyPressed();
-    }
+    this.curves.forEach((c) => c.keyPressed());
+  }
+
+  mouseMoved() {
+    this.onChange(this.currentLut);
   }
 
   mouseClicked() {
-    let isOnTab =
-      this.p.mouseX >= this.pos.x &&
-      this.p.mouseX <= this.pos.x + this.width &&
-      this.p.mouseY >= this.pos.y &&
-      this.p.mouseY <= this.pos.y + this.buttonHeight;
-    if (isOnTab) {
+    if (this.mouseOnTab) {
       let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
       this.selected = index;
@@ -199,20 +177,15 @@ class ToneCurveUI {
   }
 
   mouseReleased() {
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].mouseReleased();
-    }
+    this.curves.forEach((c) => c.mouseReleased());
   }
 
   mouseDragged() {
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].mouseDragged();
-    }
+    this.curves.forEach((c) => c.mouseDragged());
+    this.onChange(this.currentLut);
   }
 
   mousePressed() {
-    for (let i = 0; i < 4; i++) {
-      this.curves[i].mousePressed();
-    }
+    this.curves.forEach((c) => c.mousePressed());
   }
 }
