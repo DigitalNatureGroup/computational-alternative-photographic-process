@@ -1,58 +1,38 @@
 // based on: https://github.com/ReoHokazono/tonecurve
 
 class ToneCurveUI {
-  constructor(p, pos, width, onChange) {
-    this.p = p;
-    this.onChange = onChange;
-
+  constructor(p, boundingBox, mode, onChange) {
     this.buttonHeight = 30;
     this.padding = 15;
-    width -= this.padding * 2;
-    pos.x += this.padding;
-    pos.y += this.padding;
+
+    this.p = p;
+    this.width = boundingBox.width - this.padding * 2;
+    this.mode = mode;
+    this.onChange = onChange;
 
     this.lineColors = ["#FFFFFF", "#FF453A", "#30D158", "#0A84FF"];
-    this.ansLineColors = ["#8E8E93", "#C2736F", "#5C966A", "#6080A1"];
-    this.width = width;
-    this.labels = ["RGB", "R", "G", "B"];
     this.selected = 0;
-    this.buttonWidth = width / 4;
+    this.buttonWidth = this.width / 4;
     this.height = this.buttonHeight + 10 + this.width;
-    this.pos = pos;
-    this.toneCurvePos = { x: pos.x, y: pos.y + this.buttonHeight + 10 };
+    this.pos = { x: boundingBox.x + this.padding, y: boundingBox.y + this.padding };
+    this.toneCurvePos = { x: this.pos.x, y: this.pos.y + this.buttonHeight + 10 };
 
-    this.curves = [
-      new ToneCurve(p, this.toneCurvePos, width),
-      new ToneCurve(p, this.toneCurvePos, width),
-      new ToneCurve(p, this.toneCurvePos, width),
-      new ToneCurve(p, this.toneCurvePos, width),
-    ];
-    for (let i = 0; i < 3; i++) {
-      this.curves[i + 1].isHidden = true;
+    this.curves = [new ToneCurve(p, this.toneCurvePos, this.width, this.lineColors[0])];
+    this.tabs = ["RGB"];
+    if (mode === "full") {
+      for (let i = 1; i < 4; i++) {
+        this.curves.push(new ToneCurve(p, this.toneCurvePos, this.width, this.lineColors[i], true));
+      }
+      this.tabs.push(...["R", "G", "B"]);
     }
 
     this.p.textFont("Helvetica", 20);
     this.p.textAlign(CENTER, CENTER);
   }
 
-  get rgbLut() {
-    return this.curves[0].controlLine.lut;
-  }
-
-  get rLut() {
-    return this.curves[1].controlLine.lut;
-  }
-
-  get gLut() {
-    return this.curves[2].controlLine.lut;
-  }
-
-  get bLut() {
-    return this.curves[3].controlLine.lut;
-  }
-
   get currentLut() {
-    return [this.rgbLut, this.rLut, this.gLut, this.bLut];
+    // rgb, r, g, b
+    return this.curves.map((c) => c.controlLine.lut);
   }
 
   get mouseOnTab() {
@@ -89,29 +69,36 @@ class ToneCurveUI {
     );
     this.p.noFill();
 
-    this.drawTab();
-    this.curves.forEach((c) => c.drawBg());
+    if (this.curves.length > 1) this.drawTab();
 
-    for (let i = 1; i < 4; i++) {
-      let points = this.curves[i].controlPoints;
+    // draw background
+    this.p.noStroke();
+    this.p.fill("#454545");
+    this.p.square(this.toneCurvePos.x, this.toneCurvePos.y, this.width, 3);
+    this.p.noFill();
+    this.p.stroke("#000000");
+
+    // draw lut line
+    for (const curve of this.curves) {
+      let points = curve.controlPoints;
+      let lut = curve.controlLine.lut;
       let noEdited =
         points.length == 2 &&
         points[0].center.x == 0 &&
         points[0].center.y == 0 &&
         points[1].center.x == 255 &&
         points[1].center.y == 255;
-      let lut = this.curves[i].controlLine.lut;
-      let color = this.lineColors[i];
       if (!noEdited) {
-        this.curves[0].drawLutLine(lut, color);
+        this.curves[0].drawLutLine(lut, curve.color);
       }
     }
 
+    // draw curves
     this.curves.forEach((c) => c.draw());
   }
 
   drawTab() {
-    let isOnIndex = 4;
+    let isOnIndex = -1;
     if (this.mouseOnTab) {
       let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
@@ -119,27 +106,23 @@ class ToneCurveUI {
     }
 
     this.p.noStroke();
-    this.p.textFont("Helvetica", 20);
+    this.p.textFont("Helvetica", 14);
     this.p.textAlign(CENTER, CENTER);
 
     let y = this.pos.y + this.buttonHeight / 2;
-    for (let i = 0; i < 4; i++) {
-      if (i == this.selected) {
-        this.p.fill(i == isOnIndex ? "#44A1FF" : "#0A84FF");
-        //fill("#0A84FF")
-        this.curves[i].isHidden = false;
+
+    this.tabs.forEach((tab, index) => {
+      if (index == this.selected) {
+        this.p.fill(index == isOnIndex ? "#44A1FF" : "#0A84FF");
       } else {
-        this.p.fill(i == isOnIndex ? "#5F5F5F" : "#454545");
-        //fill(isOnTab ? "#5F5F5F" : "#454545")
-        //fill("#454545")
-        this.curves[i].isHidden = true;
+        this.p.fill(index == isOnIndex ? "#5F5F5F" : "#454545");
       }
-      let x = this.buttonWidth * i + this.pos.x;
+      let x = this.buttonWidth * index + this.pos.x;
 
       let corners = [0, 0, 0, 0];
-      if (i == 0) {
+      if (index == 0) {
         corners = [3, 0, 0, 3];
-      } else if (i == 3) {
+      } else if (index == 3) {
         corners = [0, 3, 3, 0];
       }
 
@@ -154,8 +137,9 @@ class ToneCurveUI {
         corners[3]
       );
       this.p.fill("#FFFFFF");
-      this.p.text(this.labels[i], x, y, this.buttonWidth);
-    }
+      this.p.text(tab, x, y, this.buttonWidth);
+    }, this);
+
     this.p.noFill();
     this.p.stroke(0);
   }
@@ -173,6 +157,8 @@ class ToneCurveUI {
       let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
       let index = parseInt(mousePos, 10);
       this.selected = index;
+      this.curves.forEach((c) => (c.isHidden = true));
+      this.curves[index].isHidden = false;
     }
   }
 

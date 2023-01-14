@@ -58,7 +58,7 @@ function handleFile(file, imgType) {
           createOptimazedImg();
         });
 
-        createToneCurve(updateImageByToneCurve);
+        createToneCurve("full", updateImageByToneCurve);
       }
     };
     reader.readAsDataURL(file);

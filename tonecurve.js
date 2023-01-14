@@ -1,4 +1,4 @@
-const createInstance = (onChange) => {
+const createInstance = (mode = "full", onChange) => {
   return (p) => {
     let toneCurveUI;
 
@@ -11,7 +11,7 @@ const createInstance = (onChange) => {
       const height = width * 1.5;
       const y = (p.height - height) / 2;
 
-      toneCurveUI = new ToneCurveUI(p, { x, y }, width, onChange);
+      toneCurveUI = new ToneCurveUI(p, { x, y, height, width }, mode, onChange);
     };
 
     p.draw = () => toneCurveUI.draw();
@@ -36,4 +36,4 @@ const createInstance = (onChange) => {
   };
 };
 
-const createToneCurve = (onChange) => new p5(createInstance(onChange), "tonecurve-canvas");
+const createToneCurve = (mode, onChange) => new p5(createInstance(mode, onChange), "tonecurve-canvas");

@@ -162,10 +162,11 @@ class Util {
 }
 
 class ToneCurve {
-  constructor(p, pos, size) {
+  constructor(p, pos, size, color, isHidden = false) {
     this.p = p;
 
-    this.isHidden = false;
+    this.color = color;
+    this.isHidden = isHidden;
     this.pos = pos;
     this.size = size;
     this.controlPoints = [
@@ -208,7 +209,7 @@ class ToneCurve {
 
   drawBg() {
     this.p.noStroke();
-    this.p.fill("#454545");
+    this.p.fill(100, 0.7);
     this.p.square(this.pos.x, this.pos.y, this.size, 3);
     this.p.noFill();
     this.p.stroke("#000000");
@@ -283,7 +284,7 @@ class ToneCurve {
     }
   }
 
-  drawLutLine(lut, color) {
+  drawLutLine(lut, color = this.color) {
     if (this.isHidden) {
       return;
     }
@@ -296,24 +297,6 @@ class ToneCurve {
       this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
     }
     this.p.stroke("#000000");
-  }
-
-  drawAnsLine(luts, isRgb) {
-    if (this.isHidden) {
-      return;
-    }
-  }
-
-  drawAnsPoints(points) {
-    this.p.fill("#8E8E93");
-    this.p.noStroke();
-    if (this.isHidden) {
-      return;
-    }
-    for (let i = 0; i < points.length; i++) {
-      let m0 = this.util.toMain(points[i]);
-      this.p.circle(m0.x, m0.y, 8);
-    }
   }
 
   addControlPoint() {
