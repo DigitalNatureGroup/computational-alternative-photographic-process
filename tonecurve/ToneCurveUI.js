@@ -3,28 +3,29 @@
 class ToneCurveUI {
   constructor(p, boundingBox, mode, onChange) {
     this.buttonHeight = 30;
-    this.padding = 15;
+    this.padding = 5;
 
     this.p = p;
     this.width = boundingBox.width - this.padding * 2;
     this.mode = mode;
     this.onChange = onChange;
 
-    this.lineColors = ["#FFFFFF", "#FF453A", "#30D158", "#0A84FF"];
+    // this.colors = ["#616161", "#FF453A", "#30D158", "#0A84FF"];
+    this.colors = ["#616161", "#e57373", "#26a69a", "#00bcd4"];
     this.selected = 0;
-    this.buttonWidth = this.width / 4;
     this.height = this.buttonHeight + 10 + this.width;
     this.pos = { x: boundingBox.x + this.padding, y: boundingBox.y + this.padding };
     this.toneCurvePos = { x: this.pos.x, y: this.pos.y + this.buttonHeight + 10 };
 
-    this.curves = [new ToneCurve(p, this.toneCurvePos, this.width, this.lineColors[0])];
+    this.curves = [new ToneCurve(p, this.toneCurvePos, this.width, this.colors[0])];
     this.tabs = ["RGB"];
     if (mode === "full") {
       for (let i = 1; i < 4; i++) {
-        this.curves.push(new ToneCurve(p, this.toneCurvePos, this.width, this.lineColors[i], true));
+        this.curves.push(new ToneCurve(p, this.toneCurvePos, this.width, this.colors[i], true));
       }
       this.tabs.push(...["R", "G", "B"]);
     }
+    this.buttonWidth = this.width / this.curves.length;
 
     this.p.textFont("Helvetica", 20);
     this.p.textAlign(CENTER, CENTER);
@@ -58,25 +59,26 @@ class ToneCurveUI {
   }
 
   draw() {
+    this.p.background("#fafafa");
     this.p.noStroke();
-    this.p.fill("#2E2F30");
-    this.p.rect(
-      this.pos.x - this.padding,
-      this.pos.y - this.padding,
-      this.width + this.padding * 2,
-      this.height + this.padding * 2,
-      5
-    );
+    //     this.p.fill("#e0e0e0");
+    //     this.p.rect(
+    //       this.pos.x - this.padding,
+    //       this.pos.y - this.padding,
+    //       this.width + this.padding * 2,
+    //       this.height + this.padding * 2,
+    //       5
+    //     );
     this.p.noFill();
 
-    if (this.curves.length > 1) this.drawTab();
+    this.drawTab();
 
     // draw background
     this.p.noStroke();
-    this.p.fill("#454545");
+    this.p.fill("#eeeeee");
     this.p.square(this.toneCurvePos.x, this.toneCurvePos.y, this.width, 3);
     this.p.noFill();
-    this.p.stroke("#000000");
+    this.p.stroke("#616161");
 
     // draw lut line
     for (const curve of this.curves) {
@@ -97,14 +99,14 @@ class ToneCurveUI {
     this.curves.forEach((c) => c.draw());
   }
 
-  drawTab() {
-    let isOnIndex = -1;
-    if (this.mouseOnTab) {
-      let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
-      let index = parseInt(mousePos, 10);
-      isOnIndex = index;
-    }
+  get hoveredTabIndex() {
+    if (!this.mouseOnTab) return -1;
 
+    const mousePos = ((this.p.mouseX - this.pos.x) / this.width) * this.curves.length;
+    return parseInt(mousePos, 10);
+  }
+
+  drawTab() {
     this.p.noStroke();
     this.p.textFont("Helvetica", 14);
     this.p.textAlign(CENTER, CENTER);
@@ -112,11 +114,8 @@ class ToneCurveUI {
     let y = this.pos.y + this.buttonHeight / 2;
 
     this.tabs.forEach((tab, index) => {
-      if (index == this.selected) {
-        this.p.fill(index == isOnIndex ? "#44A1FF" : "#0A84FF");
-      } else {
-        this.p.fill(index == isOnIndex ? "#5F5F5F" : "#454545");
-      }
+      const backColor = index === this.selected ? this.colors[index] : "#f5f5f5";
+      const labelColor = index === this.selected ? "#f5f5f5" : this.colors[index];
       let x = this.buttonWidth * index + this.pos.x;
 
       let corners = [0, 0, 0, 0];
@@ -126,6 +125,8 @@ class ToneCurveUI {
         corners = [0, 3, 3, 0];
       }
 
+      // this.p.fill(index == this.selected ? "#9e9e9e" : "#f5f5f5");
+      this.p.fill(backColor);
       this.p.rect(
         x,
         this.pos.y,
@@ -136,7 +137,8 @@ class ToneCurveUI {
         corners[2],
         corners[3]
       );
-      this.p.fill("#FFFFFF");
+      // this.p.fill(index == this.selected ? "#FFFFFF": "#9e9e9e");
+      this.p.fill(labelColor);
       this.p.text(tab, x, y, this.buttonWidth);
     }, this);
 
@@ -153,9 +155,8 @@ class ToneCurveUI {
   }
 
   mouseClicked() {
-    if (this.mouseOnTab) {
-      let mousePos = ((this.p.mouseX - this.pos.x) / this.width) * 4;
-      let index = parseInt(mousePos, 10);
+    const index = this.hoveredTabIndex;
+    if (index >= 0) {
       this.selected = index;
       this.curves.forEach((c) => (c.isHidden = true));
       this.curves[index].isHidden = false;

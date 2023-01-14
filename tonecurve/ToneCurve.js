@@ -212,7 +212,7 @@ class ToneCurve {
     this.p.fill(100, 0.7);
     this.p.square(this.pos.x, this.pos.y, this.size, 3);
     this.p.noFill();
-    this.p.stroke("#000000");
+    this.p.stroke("#616161");
   }
 
   keyPressed() {
@@ -279,7 +279,6 @@ class ToneCurve {
 
     this.controlLine.update();
     if (!this.isControlPointDragging && this.controlLine.isOnMidLine) {
-      console.log("add control point");
       this.addControlPoint();
     }
   }
@@ -296,7 +295,7 @@ class ToneCurve {
       let mp1 = this.util.toMain(p1);
       this.p.line(mp0.x, mp0.y, mp1.x, mp1.y);
     }
-    this.p.stroke("#000000");
+    this.p.stroke("#616161");
   }
 
   addControlPoint() {
