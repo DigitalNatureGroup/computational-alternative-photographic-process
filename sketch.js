@@ -19,13 +19,6 @@ let toneCurve;
 let currentEditorItemIndex = 0;
 let process = "";
 
-function handleSelect(event) {
-  process = event.target.value;
-  toneCurve?.updateProcess(process.endsWith("_full") ? "full" : "mono");
-
-  completeForm();
-}
-
 async function completeForm() {
   if (!currentImg || !process) return;
 
@@ -40,27 +33,9 @@ async function completeForm() {
   // ファイルアップロード部分を隠してキャンバスを表示
   hide("upload-area");
   show("canvas-area");
+  console.log('optimize')
 
-  // createOptimazedImg();
-}
-
-// for materialize
-document.addEventListener("DOMContentLoaded", function () {
-  const elem = document.querySelectorAll("select")[0];
-  M.FormSelect.init(elem, []);
-});
-
-function onClickTabItem(index) {
-  const headers = document.getElementsByClassName("editor-tab-header-item");
-  headers.forEach((e) => e.classList.remove("selected"));
-  headers[index].classList.add("selected");
-
-  const contents = document.getElementsByClassName("editor-tab-item");
-  contents.forEach((e) => hide(e.id));
-  show(contents[index].id);
-
-  currentEditorItemIndex = index;
-  resetParameters();
+  createOptimazedImg();
 }
 
 function show(elemId) {
@@ -78,30 +53,6 @@ async function compressImg(img) {
       resolve();
     }, 100)
   );
-}
-
-// on upload file
-function handleFile(file, imgType) {
-  if (file.type.startsWith("image/")) {
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const blob = event.currentTarget.result;
-      if (imgType === "colorpatch") {
-        colorpatchImg = loadImage(blob, compressImg);
-      } else if (imgType === "target") {
-        originalImg = loadImage(blob);
-        await compressImg(originalImg);
-        currentImg = loadImage(blob);
-        await compressImg(currentImg);
-
-        completeForm();
-      }
-    };
-    reader.readAsDataURL(file);
-  } else {
-    alert("Please upload image file!!");
-    currentImg = null;
-  }
 }
 
 function setup() {
@@ -159,6 +110,29 @@ function draw() {
   //   text("Original", x, y - fontSize * 1.5, width);
   //   image(originalImg, x, y, width, originalImgHeight);
 }
+
+// トーンカーブによる色調変更を適用
+const updateImageByToneCurve = (lut) => {
+  if (!originalImg || !currentImg) return;
+
+  originalImg.loadPixels();
+  currentImg.loadPixels();
+
+  for (let i = 0; i < 4 * originalImg.width * originalImg.height; i += 4) {
+    currentImg.pixels[i] = lut[0][originalImg.pixels[i]];
+    currentImg.pixels[i + 1] = lut[0][originalImg.pixels[i + 1]];
+    currentImg.pixels[i + 2] = lut[0][originalImg.pixels[i + 2]];
+
+    if (lut.length === 1) continue;
+
+    currentImg.pixels[i] = lut[1][originalImg.pixels[i]];
+    currentImg.pixels[i + 1] = lut[2][originalImg.pixels[i + 1]];
+    currentImg.pixels[i + 2] = lut[3][originalImg.pixels[i + 2]];
+  }
+
+  originalImg.updatePixels();
+  currentImg.updatePixels();
+};
 
 // サーバでパラメータを変化させた画像を計算して更新
 function updateImageBySlider() {
@@ -254,7 +228,7 @@ async function createOptimazedImg() {
   };
 
   return httpPost(
-    `${SERVER_URL}/api/optimize`,
+    `${SERVER_URL}/api/optimize/${process}`,
     "json",
     body,
     function (result) {
@@ -296,25 +270,3 @@ function openHowToPrint() {
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
-
-const updateImageByToneCurve = (lut) => {
-  if (!originalImg || !currentImg) return;
-
-  originalImg.loadPixels();
-  currentImg.loadPixels();
-
-  for (let i = 0; i < 4 * originalImg.width * originalImg.height; i += 4) {
-    currentImg.pixels[i] = lut[0][originalImg.pixels[i]];
-    currentImg.pixels[i + 1] = lut[0][originalImg.pixels[i + 1]];
-    currentImg.pixels[i + 2] = lut[0][originalImg.pixels[i + 2]];
-
-    if (lut.length === 1) continue;
-
-    currentImg.pixels[i] = lut[1][originalImg.pixels[i]];
-    currentImg.pixels[i + 1] = lut[2][originalImg.pixels[i + 1]];
-    currentImg.pixels[i + 2] = lut[3][originalImg.pixels[i + 2]];
-  }
-
-  originalImg.updatePixels();
-  currentImg.updatePixels();
-};
