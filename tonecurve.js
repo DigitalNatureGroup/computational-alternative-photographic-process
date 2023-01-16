@@ -61,6 +61,10 @@ const createInstance = (mode = "full", onChange) => {
     p.reset = () => {
       toneCurveUI.reset();
     };
+
+    p.updateProcess = (mode) => {
+      toneCurveUI.updateProcess(mode);
+    };
   };
 };
 

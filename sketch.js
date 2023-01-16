@@ -15,8 +15,40 @@ let optimizedPreviewImg;
 let canvasWidth, canvasHeight;
 // tone curve UI
 let toneCurve;
-// 0: slider, 1: tonecurve
-let currentEditorItemIndex = 1;
+// 0: tonecurve, 1: slider
+let currentEditorItemIndex = 0;
+let process = "";
+
+function handleSelect(event) {
+  process = event.target.value;
+  toneCurve?.updateProcess(process.endsWith("_full") ? "full" : "mono");
+
+  completeForm();
+}
+
+async function completeForm() {
+  if (!currentImg || !process) return;
+
+  predictCurrntImg();
+
+  // disableされているコンポーネントを全てenableに
+  document.querySelectorAll(":disabled").forEach((elem) => {
+    if (elem.id === "optimization") elem.innerText = "Loading...";
+    else elem.disabled = false;
+  });
+
+  // ファイルアップロード部分を隠してキャンバスを表示
+  hide("upload-area");
+  show("canvas-area");
+
+  // createOptimazedImg();
+}
+
+// for materialize
+document.addEventListener("DOMContentLoaded", function () {
+  const elem = document.querySelectorAll("select")[0];
+  M.FormSelect.init(elem, []);
+});
 
 function onClickTabItem(index) {
   const headers = document.getElementsByClassName("editor-tab-header-item");
@@ -52,28 +84,17 @@ async function compressImg(img) {
 function handleFile(file, imgType) {
   if (file.type.startsWith("image/")) {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const blob = event.currentTarget.result;
       if (imgType === "colorpatch") {
         colorpatchImg = loadImage(blob, compressImg);
       } else if (imgType === "target") {
-        originalImg = loadImage(blob, compressImg);
-        currentImg = loadImage(blob, async (img) => {
-          await compressImg(img);
-          predictCurrntImg();
+        originalImg = loadImage(blob);
+        await compressImg(originalImg);
+        currentImg = loadImage(blob);
+        await compressImg(currentImg);
 
-          // disableされているコンポーネントを全てenableに
-          document.querySelectorAll(":disabled").forEach((elem) => {
-            if (elem.id === "optimization") elem.innerText = "Loading...";
-            else elem.disabled = false;
-          });
-
-          // ファイルアップロード部分を隠してキャンバスを表示
-          hide("upload-area");
-          show("canvas-area");
-
-          // createOptimazedImg();
-        });
+        completeForm();
       }
     };
     reader.readAsDataURL(file);
@@ -90,7 +111,7 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("canvas");
 
-  toneCurve = createToneCurve("mono", updateImageByToneCurve);
+  toneCurve = createToneCurve("full", updateImageByToneCurve);
 
   // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
   hide("canvas-area");
@@ -181,14 +202,14 @@ function updateImageBySlider() {
 function resetParameters() {
   switch (currentEditorItemIndex) {
     case 0:
+      toneCurve.reset();
+      break;
+    case 1:
       document.getElementById("hue").value = 0;
       document.getElementById("saturation").value = 1;
       document.getElementById("lightness").value = 1;
       document.getElementById("contrast").value = 0;
       document.getElementById("kelvin").value = 6600;
-      break;
-    case 1:
-      toneCurve.reset();
     default:
       break;
   }
@@ -208,7 +229,7 @@ function predictCurrntImg() {
   };
 
   return httpPost(
-    `${SERVER_URL}/api/predict/platinum`,
+    `${SERVER_URL}/api/predict/${process}`,
     "json",
     body,
     function (result) {

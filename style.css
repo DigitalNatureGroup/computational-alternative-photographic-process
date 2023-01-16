@@ -119,20 +119,18 @@ section.image-preview-area {
   vertical-align: bottom;
 }
 
-.drag-erea {
+.drag-area {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  gap: 1em;
 }
 
-.drag-erea.drag {
-  background: #f0f0f0;
-}
-
-.drag-erea input {
-   margin: 0 auto;
+.select-process {
+  width: 30%;
 }
 
 .hidden {

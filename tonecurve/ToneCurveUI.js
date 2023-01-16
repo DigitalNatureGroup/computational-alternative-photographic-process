@@ -7,7 +7,6 @@ class ToneCurveUI {
 
     this.p = p;
     this.width = boundingBox.width - this.padding * 2;
-    this.mode = mode;
     this.onChange = onChange;
 
     // this.colors = ["#616161", "#FF453A", "#30D158", "#0A84FF"];
@@ -17,18 +16,23 @@ class ToneCurveUI {
     this.pos = { x: boundingBox.x + this.padding, y: boundingBox.y + this.padding };
     this.toneCurvePos = { x: this.pos.x, y: this.pos.y + this.buttonHeight + 10 };
 
-    this.curves = [new ToneCurve(p, this.toneCurvePos, this.width, this.colors[0])];
+    this.p.textFont("Helvetica", 20);
+    this.p.textAlign(CENTER, CENTER);
+
+    this.updateProcess(mode);
+  }
+
+  updateProcess(mode) {
+    this.mode = mode;
+    this.curves = [new ToneCurve(this.p, this.toneCurvePos, this.width, this.colors[0])];
     this.tabs = ["RGB"];
     if (mode === "full") {
       for (let i = 1; i < 4; i++) {
-        this.curves.push(new ToneCurve(p, this.toneCurvePos, this.width, this.colors[i], true));
+        this.curves.push(new ToneCurve(this.p, this.toneCurvePos, this.width, this.colors[i], true));
       }
       this.tabs.push(...["R", "G", "B"]);
     }
     this.buttonWidth = this.width / this.curves.length;
-
-    this.p.textFont("Helvetica", 20);
-    this.p.textAlign(CENTER, CENTER);
   }
 
   get currentLut() {

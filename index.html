@@ -23,7 +23,7 @@
         <div id="canvas" class="canvas-container">
         </div>
       </div>
-      <div id="upload-area" class="drag-erea">
+      <div id="upload-area" class="drag-area">
         <div class="section hidden">
           <label for="colorpatch">Colorpatch (optional)</label>
           <input type="file" id="colorpatch" accept="image/*" value="upload"
@@ -33,6 +33,16 @@
           <label for="target" class="hidden">Printed image</label>
           <input type="file" id="target" accept="image/*" value="upload"
             onchange="handleFile(event.target.files[0], 'target')">
+        </div>
+        <div class="input-field select-process">
+          <select onchange="handleSelect(event)">
+            <option value="" disabled selected>Choose your printing process</option>
+            <option value="cyanotype_full">Cyanotype (color)</option>
+            <option value="cyanotype_mono">Cyanotype (monochrome)</option>
+            <option value="platinum">Platinum printing</option>
+            <option value="salt">Salt printing</option>
+          </select>
+          <label>Printing process</label>
         </div>
       </div>
       <div id="loading" class="loading-container hidden">
@@ -45,8 +55,13 @@
 
       <div class="editor-tab-container">
         <div class="editor-tab-header row">
-          <div class="editor-tab-header-item col s6" onclick="onClickTabItem(0)">Parameters</div>
-          <div class="editor-tab-header-item col s6 selected" onclick="onClickTabItem(1)">Tone curve</div>
+          <div class="editor-tab-header-item col s6 selected" onclick="onClickTabItem(0)">Tone curve</div>
+          <div class="editor-tab-header-item col s6" onclick="onClickTabItem(1)">Parameters</div>
+        </div>
+
+        <div id="tonecurve-container" class="editor-tab-item">
+          <div id="tonecurve-canvas" class="tonecurve">
+          </div>
         </div>
         <div id="sliders-container" class="editor-tab-item hidden">
           <div class="sliders">
@@ -55,25 +70,23 @@
           </div>
           <div class="sliders">
             <label for="saturation">Saturation</label>
-            <input disabled type="range" id="saturation" onchange="updateImageBySlider()" min="0" max="1" value="1" step="0.01">
+            <input disabled type="range" id="saturation" onchange="updateImageBySlider()" min="0" max="1" value="1"
+              step="0.01">
           </div>
           <div class="sliders">
             <label for="lightness">Lightness</label>
-            <input disabled type="range" id="lightness" onchange="updateImageBySlider()" min="0" max="1" value="1" step="0.01">
+            <input disabled type="range" id="lightness" onchange="updateImageBySlider()" min="0" max="1" value="1"
+              step="0.01">
           </div>
           <div class="sliders">
             <label for="contrast">Contrast</label>
-            <input disabled type="range" id="contrast" onchange="updateImageBySlider()" min="-255" max="255" value="0" step="1">
+            <input disabled type="range" id="contrast" onchange="updateImageBySlider()" min="-255" max="255" value="0"
+              step="1">
           </div>
           <div class="sliders">
             <label for="kelvin">Color temperature</label>
-            <input disabled type="range" id="kelvin" onchange="updateImageBySlider()" min="1000" max="12200" value="6600"
-              step="1">
-          </div>
-        </div>
-
-        <div id="tonecurve-container" class="editor-tab-item">
-          <div id="tonecurve-canvas" class="tonecurve">
+            <input disabled type="range" id="kelvin" onchange="updateImageBySlider()" min="1000" max="12200"
+              value="6600" step="1">
           </div>
         </div>
       </div>
