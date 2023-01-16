@@ -33,7 +33,6 @@ async function completeForm() {
   // ファイルアップロード部分を隠してキャンバスを表示
   hide("upload-area");
   show("canvas-area");
-  console.log('optimize')
 
   createOptimazedImg();
 }
@@ -261,7 +260,19 @@ function showOptimizedImg() {
 }
 
 function downloadCurrentImg() {
-  currentImg.save("image", "png");
+  currentImg.save('edited', 'png')
+}
+
+async function downloadAll() {
+  const downloadedImgs = [
+    { name: "edited.png", content: currentImg?.canvas?.toDataURL() },
+    { name: "preview.png", content: previewImg?.canvas?.toDataURL() },
+    { name: "tonecurve.png", content: toneCurve.getAsBase64() },
+  ];
+
+  const zipBlob = await generateZipBlob(downloadedImgs, "images");
+
+  saveBlob(zipBlob, "images");
 }
 
 function openHowToPrint() {

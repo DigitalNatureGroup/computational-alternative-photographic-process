@@ -65,6 +65,8 @@ const createInstance = (mode = "full", onChange) => {
     p.updateProcess = (mode) => {
       toneCurveUI.updateProcess(mode);
     };
+
+    p.getAsBase64 = () => p.get(...toneCurveUI.curveBoundingBox).canvas.toDataURL();
   };
 };
 

@@ -4,6 +4,7 @@ class ToneCurveUI {
   constructor(p, boundingBox, mode, onChange) {
     this.buttonHeight = 30;
     this.padding = 5;
+    this.headerMargin = 10;
 
     this.p = p;
     this.width = boundingBox.width - this.padding * 2;
@@ -12,14 +13,18 @@ class ToneCurveUI {
     // this.colors = ["#616161", "#FF453A", "#30D158", "#0A84FF"];
     this.colors = ["#616161", "#e57373", "#26a69a", "#00bcd4"];
     this.selected = 0;
-    this.height = this.buttonHeight + 10 + this.width;
+    this.height = this.buttonHeight + this.headerMargin + this.width;
     this.pos = { x: boundingBox.x + this.padding, y: boundingBox.y + this.padding };
-    this.toneCurvePos = { x: this.pos.x, y: this.pos.y + this.buttonHeight + 10 };
+    this.toneCurvePos = { x: this.pos.x, y: this.pos.y + this.buttonHeight + this.headerMargin };
 
     this.p.textFont("Helvetica", 20);
     this.p.textAlign(CENTER, CENTER);
 
     this.updateProcess(mode);
+  }
+
+  get curveBoundingBox() {
+    return [this.toneCurvePos.x - 1, this.toneCurvePos.y - 1, this.width + 2, this.width + 2];
   }
 
   updateProcess(mode) {
@@ -28,7 +33,9 @@ class ToneCurveUI {
     this.tabs = ["RGB"];
     if (mode === "full") {
       for (let i = 1; i < 4; i++) {
-        this.curves.push(new ToneCurve(this.p, this.toneCurvePos, this.width, this.colors[i], true));
+        this.curves.push(
+          new ToneCurve(this.p, this.toneCurvePos, this.width, this.colors[i], true)
+        );
       }
       this.tabs.push(...["R", "G", "B"]);
     }

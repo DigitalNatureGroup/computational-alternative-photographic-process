@@ -6,11 +6,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" type="text/css" href="./style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
 
   <meta charset="utf-8" />
 
   <script src="./p5.min.js"></script>
   <script src="./sketch.js"></script>
+  <script src="./zip.js"></script>
   <script src="./handle_events.js"></script>
   <script src="./tonecurve/ToneCurve.js"></script>
   <script src="./tonecurve/ToneCurveUI.js"></script>
@@ -102,7 +104,11 @@
         </button>
         <button disabled style="display: block;" class="waves-effect waves-light btn pink lighten-2"
           onclick="downloadCurrentImg()">
-          Download
+          Download edited image
+        </button>
+        <button disabled style="display: block;" class="waves-effect waves-light btn pink lighten-2"
+          onclick="downloadAll()">
+          Download all images
         </button>
       </div>
     </section>
