@@ -3,7 +3,12 @@ const createInstance = (mode = "full", onChange) => {
     let toneCurveUI;
 
     const container = document.getElementById("tonecurve-container");
-    const isDisabled = () => container.classList.contains("hidden");
+    const isDisabled = () =>
+      container.classList.contains("hidden") ||
+      p.mouseX < 0 ||
+      p.mouseX > toneCurveUI.width ||
+      p.mouseY < 0 ||
+      p.mouseY > toneCurveUI.height;
 
     p.setup = () => {
       const canvasBoundingBox = document.getElementById("tonecurve-canvas").getBoundingClientRect();
@@ -60,6 +65,7 @@ const createInstance = (mode = "full", onChange) => {
 
     p.reset = () => {
       toneCurveUI.reset();
+      toneCurveUI.draw();
     };
 
     p.updateProcess = (mode) => {

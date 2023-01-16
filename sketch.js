@@ -22,6 +22,11 @@ let process = "";
 async function completeForm() {
   if (!currentImg || !process) return;
 
+  if (!["cyanotype_full"].includes(process)) {
+    originalImg.filter(GRAY);
+    currentImg.filter(GRAY);
+  }
+
   predictCurrntImg();
 
   // disableされているコンポーネントを全てenableに
@@ -253,6 +258,7 @@ function showOptimizedImg() {
   show("loading");
 
   setTimeout(() => {
+    toneCurve.reset();
     currentImg = optimizedImg;
     previewImg = optimizedPreviewImg;
     hide("loading");
@@ -260,7 +266,7 @@ function showOptimizedImg() {
 }
 
 function downloadCurrentImg() {
-  currentImg.save('edited', 'png')
+  currentImg.save("edited", "png");
 }
 
 async function downloadAll() {

@@ -163,7 +163,7 @@ class ToneCurveUI {
   }
 
   mouseMoved() {
-    this.onChange(this.currentLut);
+    // this.onChange(this.currentLut);
   }
 
   mouseClicked() {
