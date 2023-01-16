@@ -18,10 +18,16 @@ const createInstance = (mode = "full", onChange) => {
       // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
       // hide("tonecurve-container");
 
-      const x = 0;
+      let width, height;
+      if (p.width * 1.5 > p.height) {
+        width = p.height / 1.5;
+        height = p.height;
+      } else {
+        width = p.width;
+        height = width * 1.5;
+      }
+      const x = (p.width - width) / 2;
       const y = 0;
-      const width = p.width;
-      const height = width * 1.5;
 
       toneCurveUI = new ToneCurveUI(p, { x, y, height, width }, mode, onChange);
     };
