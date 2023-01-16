@@ -13,6 +13,23 @@ let optimizedImg;
 let optimizedPreviewImg;
 // キャンバスの幅と高さ
 let canvasWidth, canvasHeight;
+// tone curve UI
+let toneCurve;
+// 0: slider, 1: tonecurve
+let currentEditorItemIndex = 1;
+
+function onClickTabItem(index) {
+  const headers = document.getElementsByClassName("editor-tab-header-item");
+  headers.forEach((e) => e.classList.remove("selected"));
+  headers[index].classList.add("selected");
+
+  const contents = document.getElementsByClassName("editor-tab-item");
+  contents.forEach((e) => hide(e.id));
+  show(contents[index].id);
+
+  currentEditorItemIndex = index;
+  resetParameters();
+}
 
 function show(elemId) {
   document.getElementById(elemId).classList.remove("hidden");
@@ -55,10 +72,8 @@ function handleFile(file, imgType) {
           hide("upload-area");
           show("canvas-area");
 
-          createOptimazedImg();
+          // createOptimazedImg();
         });
-
-        createToneCurve("full", updateImageByToneCurve);
       }
     };
     reader.readAsDataURL(file);
@@ -74,6 +89,8 @@ function setup() {
   canvasHeight = canvasBoundingBox.height;
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("canvas");
+
+  toneCurve = createToneCurve("mono", updateImageByToneCurve);
 
   // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
   hide("canvas-area");
@@ -121,14 +138,17 @@ function draw() {
   //   text("Original", x, y - fontSize * 1.5, width);
   //   image(originalImg, x, y, width, originalImgHeight);
 }
+
 // サーバでパラメータを変化させた画像を計算して更新
-function updateImage() {
+function updateImageBySlider() {
+  if (!originalImg) return;
+
   show("loading");
 
   const body = {
     // 画像のbase64化 (サーバに文字列で渡せるように)
     img_base64: originalImg.canvas.toDataURL(),
-    colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
+    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
     // スライダーで変化させたパラメータ
     hue: document.getElementById("hue").value,
     saturation: document.getElementById("saturation").value,
@@ -146,7 +166,9 @@ function updateImage() {
       const imgBase64 = result.img_base64;
       currentImg = loadImage(`data:image/png;base64,${imgBase64}`);
 
-      hide("loading");
+      setTimeout(() => {
+        predictCurrntImg();
+      }, 100);
     },
     function (error) {
       alert(error);
@@ -157,13 +179,21 @@ function updateImage() {
 
 // 全てのパラメータを初期値に戻して画像を更新
 function resetParameters() {
-  document.getElementById("hue").value = 0;
-  document.getElementById("saturation").value = 1;
-  document.getElementById("lightness").value = 1;
-  document.getElementById("contrast").value = 0;
-  document.getElementById("kelvin").value = 6600;
+  switch (currentEditorItemIndex) {
+    case 0:
+      document.getElementById("hue").value = 0;
+      document.getElementById("saturation").value = 1;
+      document.getElementById("lightness").value = 1;
+      document.getElementById("contrast").value = 0;
+      document.getElementById("kelvin").value = 6600;
+      break;
+    case 1:
+      toneCurve.reset();
+    default:
+      break;
+  }
 
-  updateImage();
+  updateImageBySlider();
 }
 
 // サーバでサイアノプリントした結果を予測して表示
@@ -174,11 +204,11 @@ function predictCurrntImg() {
 
   const body = {
     img_base64: currentImg.canvas.toDataURL(),
-    colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
+    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
   };
 
   return httpPost(
-    `${SERVER_URL}/api/predict`,
+    `${SERVER_URL}/api/predict/platinum`,
     "json",
     body,
     function (result) {
@@ -199,7 +229,7 @@ function predictCurrntImg() {
 async function createOptimazedImg() {
   const body = {
     img_base64: originalImg.canvas.toDataURL(),
-    colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
+    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
   };
 
   return httpPost(
@@ -253,13 +283,15 @@ const updateImageByToneCurve = (lut) => {
   currentImg.loadPixels();
 
   for (let i = 0; i < 4 * originalImg.width * originalImg.height; i += 4) {
+    currentImg.pixels[i] = lut[0][originalImg.pixels[i]];
+    currentImg.pixels[i + 1] = lut[0][originalImg.pixels[i + 1]];
+    currentImg.pixels[i + 2] = lut[0][originalImg.pixels[i + 2]];
+
+    if (lut.length === 1) continue;
+
     currentImg.pixels[i] = lut[1][originalImg.pixels[i]];
     currentImg.pixels[i + 1] = lut[2][originalImg.pixels[i + 1]];
     currentImg.pixels[i + 2] = lut[3][originalImg.pixels[i + 2]];
-
-    currentImg.pixels[i] = lut[0][currentImg.pixels[i]];
-    currentImg.pixels[i + 1] = lut[0][currentImg.pixels[i + 1]];
-    currentImg.pixels[i + 2] = lut[0][currentImg.pixels[i + 2]];
   }
 
   originalImg.updatePixels();

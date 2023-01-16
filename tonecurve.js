@@ -2,38 +2,67 @@ const createInstance = (mode = "full", onChange) => {
   return (p) => {
     let toneCurveUI;
 
+    const container = document.getElementById("tonecurve-container");
+    const isDisabled = () => container.classList.contains("hidden");
+
     p.setup = () => {
       const canvasBoundingBox = document.getElementById("tonecurve-canvas").getBoundingClientRect();
-      p.createCanvas(canvasBoundingBox.width, canvasBoundingBox.height);
+      const canvas = p.createCanvas(canvasBoundingBox.width, canvasBoundingBox.height);
+      canvas.parent("tonecurve-canvas");
+
+      // キャンバスの大きさの取得が完了したら一度隠してアップロードを待つ
+      // hide("tonecurve-container");
 
       const x = 0;
+      const y = 0;
       const width = p.width;
       const height = width * 1.5;
-      const y = (p.height - height) / 2;
 
       toneCurveUI = new ToneCurveUI(p, { x, y, height, width }, mode, onChange);
     };
 
-    p.draw = () => toneCurveUI.draw();
+    p.draw = () => {
+      if (isDisabled()) return;
+      toneCurveUI.draw();
+    };
 
-    p.keyPressed = () => toneCurveUI.keyPressed();
+    p.keyPressed = () => {
+      if (isDisabled()) return;
+      toneCurveUI.keyPressed();
+    };
 
-    p.mouseMoved = () => toneCurveUI.mouseMoved();
+    p.mouseMoved = () => {
+      if (isDisabled()) return;
+      toneCurveUI.mouseMoved();
+    };
 
-    p.mouseDragged = () => toneCurveUI.mouseDragged();
+    p.mouseDragged = () => {
+      if (isDisabled()) return;
+      toneCurveUI.mouseDragged();
+    };
 
-    p.mousePressed = () => toneCurveUI.mousePressed();
+    p.mousePressed = () => {
+      if (isDisabled()) return;
+      toneCurveUI.mousePressed();
+    };
 
     p.mouseReleased = () => {
+      if (isDisabled()) return;
       toneCurveUI.mouseReleased();
       if (toneCurveUI.mouseOnUI) predictCurrntImg();
     };
 
     p.mouseClicked = () => {
+      if (isDisabled()) return;
       toneCurveUI.mouseClicked();
       if (toneCurveUI.mouseOnUI) predictCurrntImg();
+    };
+
+    p.reset = () => {
+      toneCurveUI.reset();
     };
   };
 };
 
-const createToneCurve = (mode, onChange) => new p5(createInstance(mode, onChange), "tonecurve-canvas");
+const createToneCurve = (mode, onChange) =>
+  new p5(createInstance(mode, onChange), "tonecurve-canvas");

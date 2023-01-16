@@ -56,6 +56,7 @@ class ToneCurveUI {
 
   reset() {
     this.curves.forEach((c) => c.reset());
+    this.onChange(this.currentLut);
   }
 
   draw() {

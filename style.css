@@ -38,7 +38,24 @@ canvas {
   height: 50%;
 }
 
-.tonecurve-container {
+.editor-tab-header-item {
+  border-radius: 4px;
+  color: #bdbdbd;
+  cursor: pointer;
+  padding: 0 0.5em;
+  text-align: center;
+}
+
+.editor-tab-header-item.selected {
+  background-color: #26a69a;
+  color: white;
+}
+
+.editor-tab-header-item:hover {
+  color: #757575;
+}
+
+.editor-tab-item {
   position: relative;
   width: 100%;
   height: 100%;
@@ -57,7 +74,7 @@ label {
 section.image-preview-area {
   background-color: #fafafa;
   position: relative;
-  width: 75%;
+  width: 70%;
   height: 100%;
   padding-bottom: 1.6em;
   box-sizing: border-box;
@@ -75,7 +92,7 @@ section.image-preview-area {
 
 .editor {
   display: flex;
-  width: 25%;
+  width: 30%;
   height: 100%;
   padding: 5%;
   box-sizing: border-box;
