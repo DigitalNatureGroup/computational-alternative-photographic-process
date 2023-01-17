@@ -8,9 +8,8 @@ let originalImg;
 let currentImg;
 // 予測の画像
 let previewImg;
-// 最適化後の画像
-let optimizedImg;
-let optimizedPreviewImg;
+// 最適化後の画像. 左: 印刷画像, 右: プレビュー画像 が連結されている
+let optimizedImgs;
 // キャンバスの幅と高さ
 let canvasWidth, canvasHeight;
 // tone curve UI
@@ -28,6 +27,7 @@ async function completeForm() {
   }
 
   predictCurrntImg();
+  createOptimazedImg();
 
   // disableされているコンポーネントを全てenableに
   document.querySelectorAll(":disabled").forEach((elem) => {
@@ -38,8 +38,6 @@ async function completeForm() {
   // ファイルアップロード部分を隠してキャンバスを表示
   hide("upload-area");
   show("canvas-area");
-
-  createOptimazedImg();
 }
 
 function show(elemId) {
@@ -144,32 +142,24 @@ function updateImageBySlider() {
 
   show("loading");
 
-  const body = {
-    // 画像のbase64化 (サーバに文字列で渡せるように)
-    img_base64: originalImg.canvas.toDataURL(),
-    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
-    // スライダーで変化させたパラメータ
-    hue: document.getElementById("hue").value,
-    saturation: document.getElementById("saturation").value,
-    lightness: document.getElementById("lightness").value,
-    contrast: document.getElementById("contrast").value,
-    kelvin: document.getElementById("kelvin").value,
+  const body = new FormData();
+  body.append("img", toBlob(originalImg));
+  ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
+    body.append(param, document.getElementById(param).value)
+  );
+
+  const options = {
+    method: "POST",
+    body,
   };
 
-  return httpPost(
-    `${SERVER_URL}/api/process`,
-    "json",
-    body,
-    function (result) {
-      // 表示画像の更新
-      const imgBase64 = result.img_base64;
-      currentImg = loadImage(`data:image/png;base64,${imgBase64}`);
-
-      setTimeout(() => {
-        predictCurrntImg();
-      }, 100);
+  return fetch(`${SERVER_URL}/api/process`, options).then(
+    async (result) => {
+      const blob = await result.blob();
+      currentImg = loadImage(URL.createObjectURL(blob));
+      predictCurrntImg();
     },
-    function (error) {
+    (error) => {
       alert(error);
       hide("loading");
     }
@@ -195,29 +185,58 @@ function resetParameters() {
   updateImageBySlider();
 }
 
+function toBlob(image) {
+  const base64 = image.canvas.toDataURL();
+  const bin = atob(base64.replace(/^.*,/, ""));
+  const buffer = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    buffer[i] = bin.charCodeAt(i);
+  }
+
+  try {
+    return (blob = new Blob([buffer.buffer], {
+      type: "image/png",
+    }));
+  } catch (e) {
+    return false;
+  }
+}
+
+const sleep = (waitSeconds) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, waitSeconds * 1000);
+  });
+};
+
 // サーバでサイアノプリントした結果を予測して表示
-function predictCurrntImg() {
+async function predictCurrntImg() {
   if (!currentImg) return;
+
+  await sleep(0.05);
 
   show("loading");
 
-  const body = {
-    img_base64: currentImg.canvas.toDataURL(),
-    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
+  const body = new FormData();
+  body.append("img", toBlob(currentImg));
+
+  if (colorpatchImg) body.append("colorpatch", toBlob(colorpatchImg));
+
+  const options = {
+    method: "POST",
+    body,
   };
 
-  return httpPost(
-    `${SERVER_URL}/api/predict/${process}`,
-    "json",
-    body,
-    function (result) {
-      // 予測プレビュー画像の更新
-      const imgBase64 = result.img_base64;
-      previewImg = loadImage(`data:image/png;base64,${imgBase64}`);
+  return fetch(`${SERVER_URL}/api/predict/${process}`, options).then(
+    async (result) => {
+      console.log(result);
+      const blob = await result.blob();
+      previewImg = loadImage(URL.createObjectURL(blob));
 
       hide("loading");
     },
-    function (error) {
+    (error) => {
       alert(error);
       hide("loading");
     }
@@ -225,19 +244,22 @@ function predictCurrntImg() {
 }
 
 // サーバでサイアノプリントした結果について最適化した画像を保持しておく
-async function createOptimazedImg() {
-  const body = {
-    img_base64: originalImg.canvas.toDataURL(),
-    // colorpatch_base64: colorpatchImg && colorpatchImg.canvas.toDataURL(),
+function createOptimazedImg() {
+  const body = new FormData();
+  body.append("img", toBlob(originalImg));
+
+  if (colorpatchImg) body.append("colorpatch", toBlob(colorpatchImg));
+
+  const options = {
+    method: "POST",
+    body,
   };
 
-  return httpPost(
-    `${SERVER_URL}/api/optimize/${process}`,
-    "json",
-    body,
-    function (result) {
-      optimizedImg = loadImage(`data:image/png;base64,${result.opt_img_base64}`);
-      optimizedPreviewImg = loadImage(`data:image/png;base64,${result.preview_img_base64}`);
+  return fetch(`${SERVER_URL}/api/optimize/${process}`, options).then(
+    async (result) => {
+      console.log(result);
+      const blob = await result.blob();
+      optimizedImgs = loadImage(URL.createObjectURL(blob));
 
       // optimizationコンポーネントをenableに
       document.querySelectorAll(":disabled").forEach((elem) => {
@@ -247,7 +269,7 @@ async function createOptimazedImg() {
         }
       });
     },
-    function (error) {
+    (error) => {
       alert(error);
     }
   );
@@ -259,8 +281,12 @@ function showOptimizedImg() {
 
   setTimeout(() => {
     toneCurve.reset();
-    currentImg = optimizedImg;
-    previewImg = optimizedPreviewImg;
+
+    const height = optimizedImgs.height;
+    const width = optimizedImgs.width / 2;
+    currentImg.copy(optimizedImgs, 0, 0, width, height, 0, 0, width, height);
+    previewImg.copy(optimizedImgs, width, 0, width, height, 0, 0, width, height);
+
     hide("loading");
   }, 100);
 }
