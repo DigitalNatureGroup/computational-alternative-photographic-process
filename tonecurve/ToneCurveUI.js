@@ -89,8 +89,24 @@ class ToneCurveUI {
     this.p.noStroke();
     this.p.fill("#eeeeee");
     this.p.square(this.toneCurvePos.x, this.toneCurvePos.y, this.width, 3);
+
+    this.p.drawingContext.setLineDash([5, 5]);
+    this.p.stroke("#dadada");
+    const gridSize = this.width / 4;
+    for (let i = 1; i < 4; i++) {
+      const x = this.toneCurvePos.x;
+      const y = this.toneCurvePos.y;
+      this.p.line(x, y + i * gridSize, this.width, y + i * gridSize);
+    }
+    for (let i = 1; i < 4; i++) {
+      const x = this.toneCurvePos.x;
+      const y = this.toneCurvePos.y;
+      this.p.line(x + i * gridSize, y, x + i * gridSize, y + this.width);
+    }
+
     this.p.noFill();
     this.p.stroke("#616161");
+    this.p.drawingContext.setLineDash([0, 0]);
 
     // draw lut line
     for (const curve of this.curves) {
