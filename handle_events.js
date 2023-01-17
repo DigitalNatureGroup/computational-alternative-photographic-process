@@ -20,10 +20,8 @@ function handleFile(file, imgType) {
       if (imgType === "colorpatch") {
         colorpatchImg = loadImage(blob, compressImg);
       } else if (imgType === "target") {
-        originalImg = loadImage(blob);
-        await compressImg(originalImg);
-        currentImg = loadImage(blob);
-        await compressImg(currentImg);
+        originalImg = loadImage(blob, compressImg);
+        currentImg = loadImage(blob, compressImg);
 
         completeForm();
       }

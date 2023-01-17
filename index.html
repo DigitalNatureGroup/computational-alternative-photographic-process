@@ -26,16 +26,16 @@
         <div id="canvas" class="canvas-container">
         </div>
       </div>
-      <div id="upload-area" class="drag-area">
-        <div class="section hidden">
-          <label for="colorpatch">Colorpatch (optional)</label>
-          <input type="file" id="colorpatch" accept="image/*" value="upload"
-            onchange="handleFile(event.target.files[0], 'colorpatch')">
-        </div>
-        <div class="section">
-          <label for="target" class="hidden">Printed image</label>
+      <div id="upload-area" class="upload-container">
+        <div class="upload-file">
+          <label for="target">Printed image</label>
           <input type="file" id="target" accept="image/*" value="upload"
             onchange="handleFile(event.target.files[0], 'target')">
+        </div>
+        <div class="upload-file">
+          <label for="colorpatch">Colorpatch image (optional)</label>
+          <input type="file" id="colorpatch" accept="image/*" value="upload"
+            onchange="handleFile(event.target.files[0], 'colorpatch')">
         </div>
         <div class="input-field select-process">
           <select onchange="handleSelect(event)">
