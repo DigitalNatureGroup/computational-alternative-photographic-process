@@ -32,6 +32,8 @@ main.editor-container {
 canvas {
   display: block;
   margin: auto;
+  height: 100%;
+  width: 100%;
 }
 
 .editor-tab-container {
@@ -86,13 +88,18 @@ section.image-preview-area {
 }
 
 .canvas-area {
+  position: absolute;
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .canvas-container {
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .editor {

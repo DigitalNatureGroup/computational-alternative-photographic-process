@@ -1,4 +1,4 @@
-const SERVER_URL = "http://localhost:8000";
+const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process.hf.space";
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -111,6 +111,17 @@ function draw() {
   textSize(fontSize);
   //   text("Original", x, y - fontSize * 1.5, width);
   //   image(originalImg, x, y, width, originalImgHeight);
+}
+
+function windowResized() {
+  //   resizeCanvas()
+}
+
+function resizeCanvas() {
+  const canvasBoundingBox = document.getElementById("canvas").getBoundingClientRect();
+  canvasWidth = canvasBoundingBox.width;
+  canvasHeight = canvasBoundingBox.height;
+  resizeWindow(canvasWidth, canvasHeight);
 }
 
 // トーンカーブによる色調変更を適用
@@ -230,7 +241,6 @@ async function predictCurrntImg() {
 
   return fetch(`${SERVER_URL}/api/predict/${process}`, options).then(
     async (result) => {
-      console.log(result);
       const blob = await result.blob();
       previewImg = loadImage(URL.createObjectURL(blob));
 
@@ -244,7 +254,7 @@ async function predictCurrntImg() {
 }
 
 // サーバでサイアノプリントした結果について最適化した画像を保持しておく
-function createOptimazedImg() {
+async function createOptimazedImg() {
   const body = new FormData();
   body.append("img", toBlob(originalImg));
 
@@ -255,24 +265,22 @@ function createOptimazedImg() {
     body,
   };
 
-  return fetch(`${SERVER_URL}/api/optimize/${process}`, options).then(
-    async (result) => {
-      console.log(result);
-      const blob = await result.blob();
-      optimizedImgs = loadImage(URL.createObjectURL(blob));
+  const result = await fetch(`${SERVER_URL}/api/optimize/${process}`, options).catch((error) => {
+    alert(error);
+  });
 
-      // optimizationコンポーネントをenableに
-      document.querySelectorAll(":disabled").forEach((elem) => {
-        if (elem.id === "optimization") {
-          elem.innerText = "Optimize image";
-          elem.disabled = false;
-        }
-      });
-    },
-    (error) => {
-      alert(error);
+  if (!result.ok) return;
+
+  const blob = await result.blob();
+  optimizedImgs = loadImage(URL.createObjectURL(blob));
+
+  // optimizationコンポーネントをenableに
+  document.querySelectorAll(":disabled").forEach((elem) => {
+    if (elem.id === "optimization") {
+      elem.innerText = "Optimize image";
+      elem.disabled = false;
     }
-  );
+  });
 }
 
 // サーバでサイアノプリントした結果を最適化して更新
