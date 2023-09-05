@@ -1,15 +1,21 @@
-# prj_critique-computational-alternative-process
+# Computational Alternative Process
 
-server: https://github.com/DigitalNatureGroup/computational-alternative-process-server
+https://github.com/DigitalNatureGroup/computational-alternative-process
 
-setup
+## Contribution
+
 ```shell
-> npm i http-server
+# setup client
+cd client
+npm i http-server
+# debug
+http-server .
 ```
 
-debug
 ```shell
-> http-server .
+# setup server
+cd server
+pip install -r requirements.txt
+# debug
+uvicorn app:app --port 7860
 ```
-
-
