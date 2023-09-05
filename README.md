@@ -1,6 +1,15 @@
-# Computational Alternative Process
+# Computational Alternative Process Project
 
-https://github.com/DigitalNatureGroup/computational-alternative-process
+## URLs
+
+(WIP)
+
+- [Web App](https://digitalnaturegroup.github.io/computational-alternative-process/)
+- [Project Page](https://digitalnature.slis.tsukuba.ac.jp/2023/06/give-life-back-to-alternative-process/)
+
+## Papers
+
+(WIP)
 
 ## Contribution
 
