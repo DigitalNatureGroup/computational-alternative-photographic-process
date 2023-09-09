@@ -151,7 +151,6 @@ const updateImageByToneCurve = (lut) => {
 // サーバでパラメータを変化させた画像を計算して更新
 function updateImageBySlider() {
   if (!originalImg) return;
-
   show("loading");
 
   const body = new FormData();
@@ -169,6 +168,9 @@ function updateImageBySlider() {
     async (result) => {
       const blob = await result.blob();
       currentImg = loadImage(URL.createObjectURL(blob));
+
+      await sleep(0.1);
+
       predictCurrntImg();
     },
     (error) => {
@@ -226,8 +228,6 @@ const sleep = (waitSeconds) => {
 async function predictCurrntImg() {
   if (!currentImg) return;
 
-  await sleep(0.05);
-
   show("loading");
 
   const body = new FormData();
@@ -242,14 +242,12 @@ async function predictCurrntImg() {
 
   return fetch(`${SERVER_URL}/api/predict/${process}`, options).then(
     async (result) => {
-      console.log('predict', result);
       const blob = await result.blob();
       previewImg = loadImage(URL.createObjectURL(blob));
 
       hide("loading");
     },
     (error) => {
-      console.log(error);
       alert(error);
       hide("loading");
     }
@@ -271,7 +269,6 @@ async function createOptimazedImg() {
   const result = await fetch(`${SERVER_URL}/api/optimize/${process}`, options).catch((error) => {
     alert(error);
   });
-  console.log('opt', result);
 
   if (!result.ok) return;
 
