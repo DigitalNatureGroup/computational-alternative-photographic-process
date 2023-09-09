@@ -26,6 +26,9 @@ def crop_patch_img(patch_img, fullcolor, debug=False):
         x_offset = 12
         y_offset = 12
 
+    if not fullcolor:
+        patch_img = patch_img.transpose((1, 0, 2))
+
     w = round(patch_img.shape[1] / w_pix)
     h = round(patch_img.shape[0] / h_pix)
 
@@ -47,10 +50,9 @@ def crop_patch_img(patch_img, fullcolor, debug=False):
 
             # RGB平均値を出力
             # flattenで一次元化しmeanで平均を取得
-            img_box_t = img_box.T
-            b = img_box_t[0].flatten().mean()
-            g = img_box_t[1].flatten().mean()
-            r = img_box_t[2].flatten().mean()
+            b = img_box.T[0].flatten().mean()
+            g = img_box.T[1].flatten().mean()
+            r = img_box.T[2].flatten().mean()
 
             target_patch.append([r,g,b])
 
