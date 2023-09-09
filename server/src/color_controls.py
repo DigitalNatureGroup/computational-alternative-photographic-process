@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 import math
 
+from src.utils import cv_to_pil, pil_to_cv
+
+
 # HSV（色相，彩度，明度）を制御する関数
 def control_HSV(img, h_deg, s_mag, v_mag):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    print(h_deg, s_mag, v_mag)
+    # print(h_deg, s_mag, v_mag)
     # HSVの回転
     img_hsv[:,:,(0)] = img_hsv[:,:,(0)] + h_deg
     img_hsv[:,:,(1)] = img_hsv[:,:,(1)] * s_mag
@@ -13,6 +16,7 @@ def control_HSV(img, h_deg, s_mag, v_mag):
     # HSV to RGB
     img_bgr = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
     return img_bgr
+
 
 # コントラストを制御する関数
 def control_contrast(img, contrast):
@@ -28,12 +32,21 @@ def control_contrast(img, contrast):
     return newImage
 
 
+def control_kelvin(img, kelvin):
+    r, g, b = __kelvin_to_rgb(int(kelvin))
+    color_matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
+    img_pil = cv_to_pil(img)
+    new_img = img_pil.convert('RGB', color_matrix)
+
+    return pil_to_cv(new_img)
+
+
 def __clamp(value: float, min_val: int = 0, max_val: int = 255) -> int:
     # use rounding to better represent values between max and min
     return int(round(max(min(value, max_val), min_val)))
 
 
-def kelvin_to_rgb(kelvin):
+def __kelvin_to_rgb(kelvin):
     temperature = kelvin / 100.0
 
     if temperature < 66.0:
@@ -80,10 +93,3 @@ def kelvin_to_rgb(kelvin):
         blue = -254.76935184120902 + 0.8274096064007395 * blue + 115.67994401066147 * math.log(blue)
 
     return __clamp(red, 0, 255), __clamp(blue, 0, 255), __clamp(green, 0, 255)
-
-def control_kelvin(img, kelvin):
-    r, g, b = kelvin_to_rgb(int(kelvin))
-    color_matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
-    new_img = img.convert('RGB', color_matrix)
-
-    return new_img

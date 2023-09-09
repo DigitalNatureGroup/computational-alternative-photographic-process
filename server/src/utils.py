@@ -13,6 +13,7 @@ def pil_to_cv(img):
         new_img = cv2.cvtColor(new_img, cv2.COLOR_RGBA2BGRA)
     return new_img
 
+
 def cv_to_pil(img):
     new_img = img.copy()
     if new_img.ndim == 2:  # モノクロ

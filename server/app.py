@@ -5,16 +5,16 @@ import logging
 import numpy as np
 import cv2
 
+from src.alternative_process import AlternativeProcess
 from src.color_controls import control_kelvin, control_contrast, control_HSV
-from src.prediction import predict_img, optimize_img
-from src.utils import cv_to_pil, pil_to_cv
+from src.consts import PROCESS_TYPES
 
 app = FastAPI()
 logger = logging.getLogger('uvicorn')
 
 origins = [
-    "http://localhost",
-    "http://localhost:8081",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://digitalnaturegroup.github.io/computational-alternative-process",
 ]
 
@@ -29,6 +29,10 @@ app.add_middleware(
 
 def to_byte_response(img):
     return cv2.imencode('.png', img)[1].tobytes()
+
+
+def read_form_image(img_buffer):
+    return cv2.imdecode(np.frombuffer(img_buffer, dtype=np.uint8), cv2.COLOR_BGR2RGB)
 
 
 @app.get("/")
@@ -50,82 +54,60 @@ async def process(
     kelvin: str = Form(...),
     img: UploadFile = File(...)
 ):
-    # logger.info(img)
-    # imgfile = request.files['img']
-    # img_array = np.asarray(bytearray(imgfile.stream.read()), dtype=np.uint8)
-    img_array = np.frombuffer(await img.read(), dtype=np.uint8)
-    img_array = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-
-    logger.info(img)
-    logger.info(img_array)
-    logger.info(img_array.shape)
-
-    # data = request.form
     hue_int = int(hue)
     saturation_int = float(saturation)
     lightness_int = float(lightness)
     contrast_int = int(contrast)
     kelvin_int = int(kelvin)
 
-    img_array = control_contrast(img_array, contrast_int)
-    img_array = control_HSV(img_array, hue_int, saturation_int, lightness_int)
+    img = read_form_image(await img.read())
+    img = control_contrast(img, contrast_int)
+    img = control_HSV(img, hue_int, saturation_int, lightness_int)
+    img = control_kelvin(img, kelvin_int)
 
-    img_pil = cv_to_pil(img_array)
-    img_pil = control_kelvin(img_pil, kelvin_int)
-    processed_img = pil_to_cv(img_pil)
-
-    return Response(content=to_byte_response(processed_img), media_type="image/png")
+    return Response(content=to_byte_response(img), media_type="image/png")
 
 
-@app.post('/api/predict/{process_name}')
+@app.post('/api/predict/{process_type}')
 async def predict(
-    process_name: str,
+    process_type: str,
     img: UploadFile = File(...)
 ):
-    if not process_name in ['cyanotype_mono', 'cyanotype_full', 'salt', 'platinum']:
-        return { 'error': 'process name is invalid' }
+    if not process_type in PROCESS_TYPES:
+        return { 'error': 'process type is invalid' }
 
-    img_array = np.frombuffer(await img.read(), dtype=np.uint8)
-    img_array = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    img = read_form_image(await img.read())
 
     # if 'colorpatch' in request.files:
     #     patchfile = request.files['colorpatch']
     #     patch_array = np.asarray(bytearray(patchfile.stream.read()), dtype=np.uint8)
     #     colorpatch = cv2.imdecode(colorpatch_array, cv2.IMREAD_COLOR)
-    #     update_patch(process_name, colorpatch)
+    #     update_patch(process_type, colorpatch)
 
-    predicted_img = predict_img(process_name, img_array)
+    predicted_img = AlternativeProcess(process_type).predict_img(img)
 
     return Response(content=to_byte_response(predicted_img), media_type="image/png")
 
 
-@app.post('/api/optimize/{process_name}')
+@app.post('/api/optimize/{process_type}')
 async def optimize(
-    process_name: str,
+    process_type: str,
     img: UploadFile = File(...)
 ):
-    if not process_name in ['cyanotype_mono', 'cyanotype_full', 'salt', 'platinum']:
-        return { 'error': 'process name is invalid' }
+    if not process_type in PROCESS_TYPES:
+        return { 'error': 'process type is invalid' }
 
-    img_array = np.frombuffer(await img.read(), dtype=np.uint8)
-    img_array = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    img = read_form_image(await img.read())
 
     # if 'colorpatch' in request.files:
     #     patchfile = request.files['colorpatch']
     #     patch_array = np.asarray(bytearray(patchfile.stream.read()), dtype=np.uint8)
     #     colorpatch = cv2.imdecode(colorpatch_array, cv2.IMREAD_COLOR)
-    #     update_patch(process_name, colorpatch)
+    #     update_patch(process_type, colorpatch)
 
-    (opt_img, preview_img) = optimize_img(process_name, img_array)
+    (opt_img, preview_img) = AlternativeProcess(process_type).tf_optimize(img)
 
-    h, w = preview_img.shape[:2]
-    preview_img = np.reshape(preview_img, (h, w, 3))
-    if process_name.endswith('full'):
-        opt_img = np.reshape(opt_img, (h, w, 3))
-    else:
-        opt_img = np.reshape(opt_img, (h, w, 1))
-        opt_img = np.array([[[i[0]] * 3 for i in j] for j in opt_img], dtype=np.uint8)
-
+    print(opt_img.shape, preview_img.shape)
     optimized_img = cv2.hconcat([opt_img, preview_img])
 
     return Response(content=to_byte_response(optimized_img), media_type="image/png")
