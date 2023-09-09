@@ -1,4 +1,6 @@
 /models/*
 !/models/.gitkeep
+/samples/*
+!/samples/.gitkeep
 /patch_data
 

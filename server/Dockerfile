@@ -29,4 +29,9 @@ RUN pip install --no-cache-dir --upgrade -r $HOME/app/requirements.txt
 
 COPY . $HOME/app
 
+USER root
+RUN python scripts/create_models.py
+
+USER prod
+
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]

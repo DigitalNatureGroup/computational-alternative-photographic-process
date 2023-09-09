@@ -5,5 +5,5 @@ numpy
 opencv-python
 tensorflow
 scikit-learn
-pandas
 pillow
+python-multipart
