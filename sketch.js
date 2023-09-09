@@ -1,4 +1,5 @@
-const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process.hf.space";
+// const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process-server.hf.space";
+const SERVER_URL = "http://localhost:7860";
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -241,12 +242,14 @@ async function predictCurrntImg() {
 
   return fetch(`${SERVER_URL}/api/predict/${process}`, options).then(
     async (result) => {
+      console.log('predict', result);
       const blob = await result.blob();
       previewImg = loadImage(URL.createObjectURL(blob));
 
       hide("loading");
     },
     (error) => {
+      console.log(error);
       alert(error);
       hide("loading");
     }
@@ -268,6 +271,7 @@ async function createOptimazedImg() {
   const result = await fetch(`${SERVER_URL}/api/optimize/${process}`, options).catch((error) => {
     alert(error);
   });
+  console.log('opt', result);
 
   if (!result.ok) return;
 
