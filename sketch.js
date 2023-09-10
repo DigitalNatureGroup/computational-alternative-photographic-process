@@ -1,5 +1,4 @@
-// const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process-server.hf.space";
-const SERVER_URL = "http://localhost:7860";
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:7860";
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -39,23 +38,6 @@ async function completeForm() {
   // ファイルアップロード部分を隠してキャンバスを表示
   hide("upload-area");
   show("canvas-area");
-}
-
-function show(elemId) {
-  document.getElementById(elemId).classList.remove("hidden");
-}
-
-function hide(elemId) {
-  document.getElementById(elemId).classList.add("hidden");
-}
-
-async function compressImg(img) {
-  return new Promise((resolve) =>
-    setTimeout(() => {
-      img.resize(img.width / 2, 0);
-      resolve();
-    }, 100)
-  );
 }
 
 function setup() {
@@ -198,31 +180,6 @@ function resetParameters() {
 
   updateImageBySlider();
 }
-
-function toBlob(image) {
-  const base64 = image.canvas.toDataURL();
-  const bin = atob(base64.replace(/^.*,/, ""));
-  const buffer = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) {
-    buffer[i] = bin.charCodeAt(i);
-  }
-
-  try {
-    return (blob = new Blob([buffer.buffer], {
-      type: "image/png",
-    }));
-  } catch (e) {
-    return false;
-  }
-}
-
-const sleep = (waitSeconds) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, waitSeconds * 1000);
-  });
-};
 
 // サーバでサイアノプリントした結果を予測して表示
 async function predictCurrntImg() {
