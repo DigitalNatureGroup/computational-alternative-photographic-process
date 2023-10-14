@@ -275,7 +275,7 @@ async function downloadAll() {
 
 function openHowToPrint() {
   const url =
-    "https://digitalnaturegroup.notion.site/How-to-Print-Tri-color-Cyanotype-478cd3c4a25d44aabf7c0c19729d3272";
+    "https://computational-altphoto.studio.site/howto-jp";
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
