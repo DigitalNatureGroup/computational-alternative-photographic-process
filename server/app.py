@@ -15,7 +15,7 @@ logger = logging.getLogger('uvicorn')
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://digitalnaturegroup.github.io/computational-alternative-process",
+    "https://digitalnaturegroup.github.io/computational-alternative-photographic-process",
 ]
 
 app.add_middleware(

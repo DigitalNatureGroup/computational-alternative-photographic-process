@@ -10,9 +10,9 @@ ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 ENV TZ JST-9
 ENV TERM xterm
-ENV PORT 5000
+ENV PORT 7860
 
-EXPOSE 5000
+EXPOSE $PORT
 
 RUN useradd -m -u 1000 prod
 USER prod
@@ -34,4 +34,4 @@ RUN python scripts/create_models.py
 
 USER prod
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "$PORT"]

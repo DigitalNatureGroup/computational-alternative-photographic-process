@@ -1,5 +1,5 @@
 // const SERVER_URL = process.env.SERVER_URL || "http://localhost:7860";
-const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process.hf.space"
+const SERVER_URL = "https://DigitalNatureGroup-computational-alternative-process-server.hf.space"
 
 // カラーパッチ画像
 let colorpatchImg;
