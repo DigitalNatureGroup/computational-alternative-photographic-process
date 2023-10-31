@@ -23,6 +23,8 @@ function handleFile(file, imgType) {
         originalImg = loadImage(blob, compressImg);
         currentImg = loadImage(blob, compressImg);
 
+        jimpImage = await Jimp.read(blob)
+
         completeForm();
       }
     };

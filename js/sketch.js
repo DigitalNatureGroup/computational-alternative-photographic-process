@@ -19,6 +19,8 @@ let toneCurve;
 let currentEditorItemIndex = 0;
 let process = "";
 
+let jimpImage;
+
 async function completeForm() {
   if (!currentImg || !process) return;
 
@@ -134,33 +136,54 @@ const updateImageByToneCurve = (lut) => {
 // サーバでパラメータを変化させた画像を計算して更新
 function updateImageBySlider() {
   if (!originalImg) return;
-  show("loading");
 
-  const body = new FormData();
-  body.append("img", toBlob(originalImg));
-  ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
-    body.append(param, document.getElementById(param).value)
+  const height = originalImg.height;
+  const width = originalImg.width;
+  currentImg.copy(originalImg, 0, 0, width, height, 0, 0, width, height);
+
+  //   currentImg.filter(HUE, document.getElementById("hue").value);
+  //   currentImg.filter(SATURATE, document.getElementById("saturation").value);
+  //   currentImg.filter(BRIGHTNESS, document.getElementById("lightness").value);
+  currentImg.loadPixels();
+  filterHSV(
+    currentImg,
+    document.getElementById("hue").value,
+    document.getElementById("saturation").value,
+    document.getElementById("lightness").value
   );
+  //   filterContrast(currentImg, document.getElementById("contrast").value);
+  //   filterKelvin(currentImg, document.getElementById("kelvin").value);
+  currentImg.updatePixels();
 
-  const options = {
-    method: "POST",
-    body,
-  };
+  // predictCurrntImg();
 
-  return fetch(`${SERVER_URL}/api/process`, options).then(
-    async (result) => {
-      const blob = await result.blob();
-      currentImg = loadImage(URL.createObjectURL(blob));
+  // show("loading");
 
-      await sleep(0.1);
+  // const body = new FormData();
+  // body.append("img", toBlob(originalImg));
+  // ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
+  //   body.append(param, document.getElementById(param).value)
+  // );
 
-      predictCurrntImg();
-    },
-    (error) => {
-      alert(error);
-      hide("loading");
-    }
-  );
+  // const options = {
+  //   method: "POST",
+  //   body,
+  // };
+
+  // return fetch(`${SERVER_URL}/api/process`, options).then(
+  //   async (result) => {
+  //     const blob = await result.blob();
+  //     currentImg = loadImage(URL.createObjectURL(blob));
+
+  //     await sleep(0.1);
+
+  //     predictCurrntImg();
+  //   },
+  //   (error) => {
+  //     alert(error);
+  //     hide("loading");
+  //   }
+  // );
 }
 
 // 全てのパラメータを初期値に戻して画像を更新
@@ -275,8 +298,7 @@ async function downloadAll() {
 }
 
 function openHowToPrint() {
-  const url =
-    "https://computational-altphoto.studio.site/howto-jp";
+  const url = "https://computational-altphoto.studio.site/howto-jp";
   // 指定したURLのサイトを開く (_blankオプションを付けると別タブで開くようになる)
   window.open(url, "_blank");
 }
