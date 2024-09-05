@@ -19,14 +19,27 @@
 cd server
 python -m venv env
 . env/bin/activate
-pip install -r requirements.macos.txt
+pip install -r requirements.txt
 python scripts/create_models.py
-python -m uvicorn app:app --port 7860
+TF_USE_LEGACY_KERAS=True python -m uvicorn app:app --port 7860
 ```
 
 ### Client
 
 If you use `http-server`:
+
+```shell
+npm i -g http-server
+http-server . -p 8888
+```
+
+以降，以下のコードで動きます．
+
+```shell
+cd server
+. env/bin/activate
+TF_USE_LEGACY_KERAS=True python -m uvicorn app:app --port 7860
+```
 
 ```shell
 npm i -g http-server
