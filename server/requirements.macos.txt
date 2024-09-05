@@ -1,0 +1,13 @@
+-i https://pypi.org/simple
+fastapi
+uvicorn
+numpy
+opencv-python
+apple
+tensorflow-deps
+tensorflow-macos
+tensorflow-metal
+tf_keras
+scikit-learn
+pillow
+python-multipart

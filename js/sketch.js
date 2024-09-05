@@ -1,5 +1,5 @@
-// const SERVER_URL = process.env.SERVER_URL || "http://localhost:7860";
-const SERVER_URL = "https://shikibu9419-capp-server.hf.space"
+const SERVER_URL = "http://localhost:7860";
+// const SERVER_URL = "https://shikibu9419-capp-server.hf.space"
 
 // カラーパッチ画像
 let colorpatchImg;
@@ -19,7 +19,7 @@ let toneCurve;
 let currentEditorItemIndex = 0;
 let process = "";
 
-let jimpImage;
+// let jimpImage;
 
 async function completeForm() {
   if (!currentImg || !process) return;
@@ -135,56 +135,86 @@ const updateImageByToneCurve = (lut) => {
 
 // サーバでパラメータを変化させた画像を計算して更新
 function updateImageBySlider() {
-  if (!originalImg) return;
+  show("loading");
 
-  const height = originalImg.height;
-  const width = originalImg.width;
-  currentImg.copy(originalImg, 0, 0, width, height, 0, 0, width, height);
-
-  //   currentImg.filter(HUE, document.getElementById("hue").value);
-  //   currentImg.filter(SATURATE, document.getElementById("saturation").value);
-  //   currentImg.filter(BRIGHTNESS, document.getElementById("lightness").value);
-  currentImg.loadPixels();
-  filterHSV(
-    currentImg,
-    document.getElementById("hue").value,
-    document.getElementById("saturation").value,
-    document.getElementById("lightness").value
+  const body = new FormData();
+  body.append("img", toBlob(originalImg));
+  ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
+    body.append(param, document.getElementById(param).value)
   );
-  //   filterContrast(currentImg, document.getElementById("contrast").value);
-  //   filterKelvin(currentImg, document.getElementById("kelvin").value);
-  currentImg.updatePixels();
 
-  // predictCurrntImg();
+  const options = {
+    method: "POST",
+    body,
+  };
 
-  // show("loading");
+  return fetch(`${SERVER_URL}/api/process`, options).then(
+    async (result) => {
+      const blob = await result.blob();
+      currentImg = loadImage(URL.createObjectURL(blob));
 
-  // const body = new FormData();
-  // body.append("img", toBlob(originalImg));
-  // ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
-  //   body.append(param, document.getElementById(param).value)
-  // );
+      await sleep(0.1);
 
-  // const options = {
-  //   method: "POST",
-  //   body,
-  // };
-
-  // return fetch(`${SERVER_URL}/api/process`, options).then(
-  //   async (result) => {
-  //     const blob = await result.blob();
-  //     currentImg = loadImage(URL.createObjectURL(blob));
-
-  //     await sleep(0.1);
-
-  //     predictCurrntImg();
-  //   },
-  //   (error) => {
-  //     alert(error);
-  //     hide("loading");
-  //   }
-  // );
+      predictCurrntImg();
+    },
+    (error) => {
+      alert(error);
+      hide("loading");
+    }
+  );
 }
+
+// function updateImageBySlider() {
+//   if (!originalImg) return;
+//
+//   const height = originalImg.height;
+//   const width = originalImg.width;
+//   currentImg.copy(originalImg, 0, 0, width, height, 0, 0, width, height);
+//
+//   //   currentImg.filter(HUE, document.getElementById("hue").value);
+//   //   currentImg.filter(SATURATE, document.getElementById("saturation").value);
+//   //   currentImg.filter(BRIGHTNESS, document.getElementById("lightness").value);
+//   currentImg.loadPixels();
+//   filterHSV(
+//     currentImg,
+//     document.getElementById("hue").value,
+//     document.getElementById("saturation").value,
+//     document.getElementById("lightness").value
+//   );
+//   //   filterContrast(currentImg, document.getElementById("contrast").value);
+//   //   filterKelvin(currentImg, document.getElementById("kelvin").value);
+//   currentImg.updatePixels();
+//
+//   // predictCurrntImg();
+//
+//   // show("loading");
+//
+//   // const body = new FormData();
+//   // body.append("img", toBlob(originalImg));
+//   // ["hue", "saturation", "lightness", "contrast", "kelvin"].forEach((param) =>
+//   //   body.append(param, document.getElementById(param).value)
+//   // );
+//
+//   // const options = {
+//   //   method: "POST",
+//   //   body,
+//   // };
+//
+//   // return fetch(`${SERVER_URL}/api/process`, options).then(
+//   //   async (result) => {
+//   //     const blob = await result.blob();
+//   //     currentImg = loadImage(URL.createObjectURL(blob));
+//
+//   //     await sleep(0.1);
+//
+//   //     predictCurrntImg();
+//   //   },
+//   //   (error) => {
+//   //     alert(error);
+//   //     hide("loading");
+//   //   }
+//   // );
+// }
 
 // 全てのパラメータを初期値に戻して画像を更新
 function resetParameters() {

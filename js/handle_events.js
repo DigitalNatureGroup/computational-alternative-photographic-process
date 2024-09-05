@@ -18,12 +18,15 @@ function handleFile(file, imgType) {
     reader.onload = async (event) => {
       const blob = event.currentTarget.result;
       if (imgType === "colorpatch") {
-        colorpatchImg = loadImage(blob, compressImg);
+        colorpatchImg = loadImage(blob);
       } else if (imgType === "target") {
-        originalImg = loadImage(blob, compressImg);
-        currentImg = loadImage(blob, compressImg);
+        originalImg = loadImage(blob);
+        currentImg = loadImage(blob);
 
-        jimpImage = await Jimp.read(blob)
+        await sleep(0.1);
+
+        originalImg.resize(originalImg.width / 2, 0);
+        currentImg.resize(currentImg.width / 2, 0);
 
         completeForm();
       }

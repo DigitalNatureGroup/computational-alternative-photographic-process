@@ -13,8 +13,8 @@ app = FastAPI()
 logger = logging.getLogger('uvicorn')
 
 origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:8888",
+    "http://127.0.0.1:8888",
     "https://digitalnaturegroup.github.io/computational-alternative-photographic-process",
 ]
 

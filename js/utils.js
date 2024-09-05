@@ -30,12 +30,3 @@ function toBlob(image) {
     return false;
   }
 }
-
-async function compressImg(img) {
-  return new Promise((resolve) =>
-    setTimeout(() => {
-      img.resize(img.width / 2, 0);
-      resolve();
-    }, 100)
-  );
-}

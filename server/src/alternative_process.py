@@ -67,7 +67,7 @@ class AlternativeProcess():
         target_tf     = tf.constant(target, dtype=tf.float64)
 
         opt = tf.keras.optimizers.legacy.Adam(learning_rate=1.0)
-#         opt = tf.keras.optimizers.Adam(learning_rate=0.1)
+        # opt = tf.keras.optimizers.Adam(learning_rate=0.1)
 
         def loss():
             x0        = param_tf

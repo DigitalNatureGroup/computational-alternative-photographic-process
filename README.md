@@ -1,7 +1,8 @@
 # Computational Alternative Process Project
 
-[Web App](https://digitalnaturegroup.github.io/computational-alternative-process/)  
-[Project Page](https://digitalnature.slis.tsukuba.ac.jp/2023/06/give-life-back-to-alternative-process/)
+[Web App](https://digitalnaturegroup.github.io/computational-alternative-process/)
+
+[Our Project Page](https://digitalnature.slis.tsukuba.ac.jp/2023/06/give-life-back-to-alternative-process/)
 
 ## Usage
 
@@ -9,12 +10,18 @@
 
 ## Development
 
+ターミナルを2つ開きます．
+
 ### Server
 
 ```shell
+# macOS (Apple Silicon)
 cd server
-pip install -r requirements.txt
-uvicorn app:app --port 7860
+python -m venv env
+. env/bin/activate
+pip install -r requirements.macos.txt
+python scripts/create_models.py
+python -m uvicorn app:app --port 7860
 ```
 
 ### Client
@@ -22,8 +29,8 @@ uvicorn app:app --port 7860
 If you use `http-server`:
 
 ```shell
-npm i http-server
-http-server .
+npm i -g http-server
+http-server . -p 8888
 ```
 
 ### Creating Regression Model
